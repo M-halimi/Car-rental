@@ -105,6 +105,9 @@ class CustomerResource extends Resource
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
+                TextColumn::make('user.name')
+                    ->label('User')
+                    ->searchable(),
                 TextColumn::make('first_name')
                     ->label('First Name')
                     ->searchable(),
@@ -114,6 +117,8 @@ class CustomerResource extends Resource
                 TextColumn::make('phone')
                     ->label('Phone')
                     ->searchable(),
+                TextColumn::make('city.name')
+                    ->label('City'),
                 TextColumn::make('nationality')
                     ->label('Nationality'),
                 TextColumn::make('is_verified')

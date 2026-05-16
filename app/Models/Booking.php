@@ -36,8 +36,27 @@ class Booking extends Model
                 $booking->daily_rate = $booking->price_per_day;
             }
 
+            if ($booking->pickup_date && $booking->return_date && ! $booking->total_days) {
+                $booking->total_days = (int) $booking->pickup_date->diffInDays($booking->return_date);
+                if ($booking->total_days < 1) {
+                    $booking->total_days = 1;
+                }
+            }
+
+            if ($booking->price_per_day && $booking->total_days && ! $booking->subtotal) {
+                $booking->subtotal = $booking->price_per_day * $booking->total_days;
+            }
+
+            if ($booking->subtotal && ! $booking->total_price) {
+                $booking->total_price = $booking->subtotal + ($booking->extras_price ?? 0);
+            }
+
             if ($booking->total_price && ! $booking->total_amount) {
                 $booking->total_amount = $booking->total_price;
+            }
+
+            if (! $booking->deposit_amount) {
+                $booking->deposit_amount = $booking->price_per_day ?? 0;
             }
         });
     }

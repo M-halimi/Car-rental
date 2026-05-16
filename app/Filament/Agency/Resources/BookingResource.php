@@ -3,10 +3,13 @@
 namespace App\Filament\Agency\Resources;
 
 use App\Filament\Agency\Resources\BookingResource\Pages;
+
 use App\Models\Booking;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -40,7 +43,7 @@ class BookingResource extends Resource
             ->schema([
                 Section::make('Booking Information')
                     ->schema([
-                        Grid::make(2)->schema([
+                        Grid::make(3)->schema([
                             Select::make('vehicle_id')
                                 ->label('Vehicle')
                                 ->relationship('vehicle', 'id')
@@ -53,36 +56,44 @@ class BookingResource extends Resource
                                 ->relationship('customer', 'id')
                                 ->getOptionLabelFromRecordUsing(fn ($record) => $record?->user?->name ?? "Customer #{$record->id}")
                                 ->required(),
+                            Select::make('pickup_city_id')
+                                ->label('Pickup City')
+                                ->relationship('pickupCity', 'name')
+                                ->required(),
                         ]),
-                        Grid::make(2)->schema([
+                        Grid::make(3)->schema([
                             DatePicker::make('pickup_date')
                                 ->label('Pickup Date')
                                 ->required(),
                             DatePicker::make('return_date')
                                 ->label('Return Date')
                                 ->required(),
+                            Select::make('return_city_id')
+                                ->label('Return City')
+                                ->relationship('returnCity', 'name'),
                         ]),
-                        Grid::make(2)->schema([
+                        Grid::make(3)->schema([
                             TextInput::make('price_per_day')
                                 ->label('Price per Day')
                                 ->numeric()
                                 ->prefix('MAD')
-                                ->required()
-                                ->live(onBlur: true)
-                                ->afterStateUpdated(fn (Set $set, $state) => $set('daily_rate', $state)),
+                                ->required(),
                             TextInput::make('daily_rate')
                                 ->label('Daily Rate')
                                 ->numeric()
-                                ->prefix('MAD')
-                                ->hidden(),
+                                ->prefix('MAD'),
                             TextInput::make('total_days')
                                 ->label('Total Days')
                                 ->numeric()
                                 ->required(),
                         ]),
-                        Grid::make(2)->schema([
+                        Grid::make(3)->schema([
                             TextInput::make('subtotal')
                                 ->label('Subtotal')
+                                ->numeric()
+                                ->prefix('MAD'),
+                            TextInput::make('extras_price')
+                                ->label('Extras')
                                 ->numeric()
                                 ->prefix('MAD'),
                             TextInput::make('total_price')
@@ -90,26 +101,32 @@ class BookingResource extends Resource
                                 ->numeric()
                                 ->prefix('MAD'),
                         ]),
-                        Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'pending' => 'Pending',
-                                'confirmed' => 'Confirmed',
-                                'active' => 'Active',
-                                'completed' => 'Completed',
-                                'cancelled' => 'Cancelled',
-                                'refunded' => 'Refunded',
-                            ])
-                            ->required(),
-                        Select::make('deposit_status')
-                            ->label('Deposit Status')
-                            ->options([
-                                'pending' => 'Pending',
-                                'paid' => 'Paid',
-                                'refunded' => 'Refunded',
-                                'waived' => 'Waived',
-                            ])
-                            ->default('pending'),
+                        Grid::make(3)->schema([
+                            TextInput::make('deposit_amount')
+                                ->label('Deposit Amount')
+                                ->numeric()
+                                ->prefix('MAD'),
+                            Select::make('deposit_status')
+                                ->label('Deposit Status')
+                                ->options([
+                                    'pending' => 'Pending',
+                                    'paid' => 'Paid',
+                                    'refunded' => 'Refunded',
+                                    'waived' => 'Waived',
+                                ])
+                                ->default('pending'),
+                            Select::make('status')
+                                ->label('Status')
+                                ->options([
+                                    'pending' => 'Pending',
+                                    'confirmed' => 'Confirmed',
+                                    'active' => 'Active',
+                                    'completed' => 'Completed',
+                                    'cancelled' => 'Cancelled',
+                                    'refunded' => 'Refunded',
+                                ])
+                                ->required(),
+                        ]),
                         Textarea::make('notes')
                             ->label('Notes')
                             ->rows(3),
@@ -130,6 +147,8 @@ class BookingResource extends Resource
                 TextColumn::make('customer.user.name')
                     ->label('Customer')
                     ->searchable(),
+                TextColumn::make('pickupCity.name')
+                    ->label('Pickup City'),
                 TextColumn::make('pickup_date')
                     ->label('Pickup')
                     ->date()
@@ -138,6 +157,8 @@ class BookingResource extends Resource
                     ->label('Return')
                     ->date()
                     ->sortable(),
+                TextColumn::make('returnCity.name')
+                    ->label('Return City'),
                 TextColumn::make('total_days')
                     ->label('Days'),
                 TextColumn::make('total_price')
@@ -180,7 +201,9 @@ class BookingResource extends Resource
                     ]),
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

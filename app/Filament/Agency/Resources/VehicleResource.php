@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -21,8 +22,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-
 class VehicleResource extends Resource
 {
     protected static ?string $model = Vehicle::class;
@@ -43,10 +42,14 @@ class VehicleResource extends Resource
                         Tabs\Tab::make('Basic Info')
                             ->schema([
                                 Section::make()->schema([
-                                    Grid::make(2)->schema([
+                                    Grid::make(3)->schema([
                                         Select::make('category_id')
                                             ->label('Category')
                                             ->relationship('category', 'name')
+                                            ->required(),
+                                        Select::make('city_id')
+                                            ->label('City')
+                                            ->relationship('city', 'name')
                                             ->required(),
                                         TextInput::make('brand')
                                             ->label('Brand')
@@ -61,13 +64,16 @@ class VehicleResource extends Resource
                                             ->numeric()
                                             ->required(),
                                     ]),
-                                    Grid::make(2)->schema([
+                                    Grid::make(3)->schema([
                                         TextInput::make('daily_rate')
-                                            ->label('Daily Rate')
+                                            ->label('Daily Rate (MAD)')
                                             ->numeric()
                                             ->required(),
                                         TextInput::make('weekly_rate')
                                             ->label('Weekly Rate')
+                                            ->numeric(),
+                                        TextInput::make('monthly_rate')
+                                            ->label('Monthly Rate')
                                             ->numeric(),
                                     ]),
                                     Grid::make(2)->schema([
@@ -153,6 +159,8 @@ class VehicleResource extends Resource
                     ->label('Plate'),
                 TextColumn::make('category.name')
                     ->label('Category'),
+                TextColumn::make('city.name')
+                    ->label('City'),
                 TextColumn::make('price_per_day')
                     ->label('Price/Day')
                     ->money('MAD'),
