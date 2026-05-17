@@ -31,6 +31,7 @@ class Vehicle extends Model
         'features',
         'status',
         'images',
+        'image_url',
         'description',
     ];
 

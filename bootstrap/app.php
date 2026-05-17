@@ -24,23 +24,24 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
         ]);
         $middleware->redirectGuestsTo(function ($request) {
-        if ($request->is('admin/*')) {
-            return route('filament.admin.auth.login');
-        }
-        if ($request->is('agency/*')) {
-            return route('filament.agency.auth.login');
-        }
-        return route('frontend.login');
-    });
+            if ($request->is('admin/*')) {
+                return route('filament.admin.auth.login');
+            }
+            if ($request->is('agency/*')) {
+                return route('filament.agency.auth.login');
+            }
 
-    $middleware->alias([
-        'role' => RoleMiddleware::class,
-        'permission' => PermissionMiddleware::class,
-        'locale' => SetLocale::class,
-    ]);
-    $middleware->web(append: [
-        SetLocale::class,
-    ]);
+            return route('frontend.login');
+        });
+
+        $middleware->alias([
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'locale' => SetLocale::class,
+        ]);
+        $middleware->web(append: [
+            SetLocale::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

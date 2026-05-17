@@ -16,6 +16,16 @@
                     @endif
 
                     <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ __('frontend.pickup_date') }}</label>
+                        <input type="date" name="pickup_date" value="{{ request('pickup_date') }}" min="{{ date('Y-m-d') }}" class="w-full border border-gray-300 rounded p-2">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">{{ __('frontend.return_date') }}</label>
+                        <input type="date" name="return_date" value="{{ request('return_date') }}" min="{{ date('Y-m-d') }}" class="w-full border border-gray-300 rounded p-2">
+                    </div>
+
+                    <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">{{ __('frontend.price_range') }}</label>
                         <div class="flex gap-2">
                             <input type="number" name="min_price" placeholder="{{ __('frontend.price_range') }}" class="w-1/2 border border-gray-300 rounded p-2" value="{{ request('min_price') }}">
@@ -77,8 +87,18 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach($vehicles as $vehicle)
+                        @php
+                            $vImages = is_array($vehicle->images) ? $vehicle->images : (json_decode($vehicle->images, true) ?? []);
+                            $vImage = !empty($vImages) ? $vImages[0] : $vehicle->image_url;
+                        @endphp
                         <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
-                            <div class="bg-gray-200 h-48 flex items-center justify-center text-6xl">🚗</div>
+                            @if($vImage)
+                                <div class="h-48 overflow-hidden">
+                                    <img src="{{ Storage::url($vImage) }}" alt="{{ $vehicle->brand }} {{ $vehicle->model }}" class="w-full h-full object-cover">
+                                </div>
+                            @else
+                                <div class="bg-gray-200 h-48 flex items-center justify-center text-6xl">🚗</div>
+                            @endif
                             <div class="p-6">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-xl font-bold text-gray-800">{{ $vehicle->brand }} {{ $vehicle->model }}</h3>

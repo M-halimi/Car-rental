@@ -15,15 +15,6 @@ Route::middleware(SetLocale::class)->group(function () {
     Route::get('/vehicle/{id}', [HomeController::class, 'vehicleDetail'])->name('frontend.vehicle.detail');
     Route::get('/compare', [HomeController::class, 'compare'])->name('frontend.compare');
 
-    Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
-    Route::post('/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
-    Route::get('/booking/step2', [BookingController::class, 'step2']);
-    Route::post('/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
-    Route::get('/booking/step3', [BookingController::class, 'step3']);
-    Route::post('/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
-    Route::get('/booking/step4', [BookingController::class, 'step4']);
-    Route::post('/booking/store', [BookingController::class, 'store'])->name('frontend.booking.store');
-
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');
     Route::post('/login', [LoginController::class, 'login']);
     Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
@@ -31,16 +22,16 @@ Route::middleware(SetLocale::class)->group(function () {
     Route::post('/register', [RegisterController::class, 'register']);
 
     Route::middleware('auth')->group(function () {
+        Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
+        Route::match(['get', 'post'], '/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
+        Route::match(['get', 'post'], '/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
+        Route::match(['get', 'post'], '/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
+        Route::post('/booking/store', [BookingController::class, 'store'])->name('frontend.booking.store');
+        Route::get('/booking/{id}', [BookingController::class, 'detail'])->name('frontend.booking.detail');
+        Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('frontend.booking.invoice');
+
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('frontend.dashboard');
     });
 });
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
-
-Route::get('/lang/{locale}', function ($locale) {
-    if (in_array($locale, ['en', 'fr', 'ar'])) {
-        session(['locale' => $locale]);
-    }
-
-    return redirect()->back();
-})->name('lang.switch');

@@ -11,7 +11,7 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <a href="{{ route('frontend.home') }}" class="text-2xl font-bold">🚗 CarRental.ma</a>
-                <div class="flex items-center space-x-4" dir="ltr">
+                <div class="flex items-center space-x-4">
                     <a href="{{ route('frontend.home') }}" class="hover:text-amber-200">{{ __('frontend.home') }}</a>
                     <a href="{{ route('frontend.vehicles') }}" class="hover:text-amber-200">{{ __('frontend.cars') }}</a>
                     @auth

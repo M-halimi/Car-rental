@@ -9,3 +9,55 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+[dir="rtl"] {
+    --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .md\:text-right {
+    text-align: left;
+}
+
+[dir="rtl"] .text-right {
+    text-align: left;
+}
+
+[dir="rtl"] .text-left {
+    text-align: right;
+}
+
+[dir="rtl"] .md\:text-left {
+    text-align: right;
+}
+
+[dir="rtl"] .mr-2,
+[dir="rtl"] .mr-3,
+[dir="rtl"] .mr-4 {
+    margin-right: 0;
+}
+
+[dir="rtl"] .mr-2 {
+    margin-left: 0.5rem;
+}
+
+[dir="rtl"] .mr-3 {
+    margin-left: 0.75rem;
+}
+
+[dir="rtl"] .mr-4 {
+    margin-left: 1rem;
+}
+
+[dir="rtl"] .ml-2 {
+    margin-right: 0.5rem;
+    margin-left: 0;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-right: calc(1rem * var(--tw-space-x-reverse, 1));
+    margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse, 1)));
+}

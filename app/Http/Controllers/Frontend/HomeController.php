@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\City;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
@@ -52,6 +53,21 @@ class HomeController extends Controller
 
         if ($request->fuel_type) {
             $query->where('fuel_type', $request->fuel_type);
+        }
+
+        if ($request->pickup_date && $request->return_date) {
+            $unavailableIds = Booking::whereIn('status', ['pending', 'confirmed', 'active'])
+                ->where(function ($q) use ($request) {
+                    $q->whereBetween('pickup_date', [$request->pickup_date, $request->return_date])
+                        ->orWhereBetween('return_date', [$request->pickup_date, $request->return_date])
+                        ->orWhere(function ($sub) use ($request) {
+                            $sub->where('pickup_date', '<=', $request->pickup_date)
+                                ->where('return_date', '>=', $request->return_date);
+                        });
+                })
+                ->pluck('vehicle_id');
+
+            $query->whereNotIn('id', $unavailableIds);
         }
 
         $vehicles = $query->orderBy('daily_rate')->get();

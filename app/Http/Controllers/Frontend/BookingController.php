@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\City;
-use App\Models\Customer;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
@@ -33,6 +33,10 @@ class BookingController extends Controller
             'pickup_date' => 'required|date|after_or_equal:today',
             'return_date' => 'required|date|after:pickup_date',
         ]);
+
+        if ($this->isVehicleUnavailable($request->vehicle_id, $request->pickup_date, $request->return_date)) {
+            return redirect()->back()->withErrors(['vehicle' => __('frontend.vehicle_unavailable')])->withInput();
+        }
 
         $vehicle = Vehicle::findOrFail($request->vehicle_id);
         $pickupDate = $request->pickup_date;
@@ -115,15 +119,14 @@ class BookingController extends Controller
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
         }
 
-        $customer = Customer::first();
+        if ($this->isVehicleUnavailable($bookingData['vehicle_id'], $bookingData['pickup_date'], $bookingData['return_date'])) {
+            return redirect()->route('frontend.home')->with('error', __('frontend.vehicle_unavailable'));
+        }
+
+        $customer = Auth::user()->customer;
+
         if (! $customer) {
-            $customer = Customer::create([
-                'user_id' => 1,
-                'first_name' => 'Guest',
-                'last_name' => 'Customer',
-                'phone' => '+212 600 000 000',
-                'city_id' => $bookingData['pickup_city_id'],
-            ]);
+            return redirect()->route('frontend.home')->with('error', __('frontend.customer_profile_not_found'));
         }
 
         if (isset($bookingData['id_document_path']) || isset($bookingData['license_document_path'])) {
@@ -154,5 +157,38 @@ class BookingController extends Controller
         $booking = Booking::with('vehicle')->find($booking->id);
 
         return view('frontend.booking.confirmation', compact('booking'));
+    }
+
+    public function detail(int $id)
+    {
+        $booking = Booking::with('vehicle', 'customer', 'pickupCity', 'returnCity')
+            ->where('customer_id', Auth::user()->customer->id)
+            ->findOrFail($id);
+
+        return view('frontend.booking.detail', compact('booking'));
+    }
+
+    public function invoice(int $id)
+    {
+        $booking = Booking::with('vehicle', 'customer', 'pickupCity', 'returnCity')
+            ->where('customer_id', Auth::user()->customer->id)
+            ->findOrFail($id);
+
+        return view('frontend.booking.invoice', compact('booking'));
+    }
+
+    private function isVehicleUnavailable(int $vehicleId, string $pickupDate, string $returnDate): bool
+    {
+        return Booking::where('vehicle_id', $vehicleId)
+            ->whereIn('status', ['pending', 'confirmed', 'active'])
+            ->where(function ($query) use ($pickupDate, $returnDate) {
+                $query->whereBetween('pickup_date', [$pickupDate, $returnDate])
+                    ->orWhereBetween('return_date', [$pickupDate, $returnDate])
+                    ->orWhere(function ($q) use ($pickupDate, $returnDate) {
+                        $q->where('pickup_date', '<=', $pickupDate)
+                            ->where('return_date', '>=', $returnDate);
+                    });
+            })
+            ->exists();
     }
 }

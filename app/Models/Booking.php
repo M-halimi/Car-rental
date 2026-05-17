@@ -25,6 +25,7 @@ class Booking extends Model
         'total_amount',
         'deposit_amount',
         'deposit_status',
+        'discount',
         'status',
         'notes',
     ];

@@ -4,10 +4,10 @@ namespace App\Filament\Agency\Resources\BookingResource\Pages;
 
 use App\Filament\Agency\Resources\BookingResource;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Support\Facades\View;
 
 class EditBooking extends EditRecord
@@ -18,7 +18,7 @@ class EditBooking extends EditRecord
     {
         return [
             ViewAction::make(),
-            \Filament\Actions\Action::make('generateContract')
+            Action::make('generateContract')
                 ->label('Generate Contract')
                 ->icon('heroicon-o-document-text')
                 ->color('warning')

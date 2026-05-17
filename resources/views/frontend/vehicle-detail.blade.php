@@ -6,7 +6,33 @@
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="grid grid-cols-1 md:grid-cols-2">
-            <div class="bg-gray-200 h-96 flex items-center justify-center text-8xl">🚗</div>
+            <div class="min-h-96">
+                @php
+                    $images = is_array($vehicle->images) ? $vehicle->images : (json_decode($vehicle->images, true) ?? []);
+                    $imageUrl = $vehicle->image_url;
+                @endphp
+
+                @if(!empty($images) || $imageUrl)
+                    <div class="grid grid-cols-2 gap-1 h-full">
+                        @foreach(array_slice($images, 0, 4) as $index => $image)
+                            <div class="bg-gray-200 h-48 flex items-center justify-center overflow-hidden">
+                                <img src="{{ Storage::url($image) }}" alt="{{ $vehicle->brand }} {{ $vehicle->model }}" class="w-full h-full object-cover">
+                            </div>
+                        @endforeach
+                        @if($imageUrl && count($images) < 4)
+                            <div class="bg-gray-200 h-48 flex items-center justify-center overflow-hidden">
+                                <img src="{{ Storage::url($imageUrl) }}" alt="{{ $vehicle->brand }} {{ $vehicle->model }}" class="w-full h-full object-cover">
+                            </div>
+                        @endif
+                    </div>
+                @elseif($vehicle->image_url)
+                    <div class="bg-gray-200 h-96 flex items-center justify-center overflow-hidden">
+                        <img src="{{ Storage::url($vehicle->image_url) }}" alt="{{ $vehicle->brand }} {{ $vehicle->model }}" class="w-full h-full object-cover">
+                    </div>
+                @else
+                    <div class="bg-gray-200 h-96 flex items-center justify-center text-8xl">🚗</div>
+                @endif
+            </div>
             <div class="p-8">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -55,6 +81,22 @@
                             <div class="text-gray-500 text-sm">{{ __('frontend.monthly_rate') }}</div>
                         </div>
                     </div>
+
+                    <form action="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" method="GET" class="space-y-3 mb-4">
+                        <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.pickup_date') }}</label>
+                                <input type="date" name="pickup_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                    class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.return_date') }}</label>
+                                <input type="date" name="return_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+3 days')) }}"
+                                    class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                            </div>
+                        </div>
+                    </form>
 
                     <a href="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" class="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 font-bold text-lg">
                         {{ __('frontend.book_now') }}
