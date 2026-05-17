@@ -13,7 +13,7 @@ class DashboardController extends Controller
         $customer = $user->customer;
 
         $bookings = $customer->bookings()
-            ->with('vehicle.brand', 'vehicle.model', 'vehicle.media')
+            ->with('vehicle')
             ->latest()
             ->paginate(10);
 

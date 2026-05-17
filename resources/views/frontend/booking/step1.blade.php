@@ -3,12 +3,17 @@
 @section('title', __('frontend.select_dates') . ' - CarRental.ma')
 
 @section('content')
+@php
+    $s1Images = is_array($vehicle->images) ? $vehicle->images : (json_decode($vehicle->images, true) ?? []);
+    $s1Image = !empty($s1Images) ? $s1Images[0] : $vehicle->image_url;
+@endphp
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-8">{{ __('frontend.select_dates') }}</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
-            <form action="{{ route('frontend.booking.step2') }}" method="GET" class="bg-white rounded-lg shadow-lg p-6">
+            <form action="{{ route('frontend.booking.step2') }}" method="POST" class="bg-white rounded-lg shadow-lg p-6">
+                @csrf
                 <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -51,7 +56,13 @@
 
         <div class="bg-white rounded-lg shadow-lg p-6 h-fit">
             <h3 class="text-xl font-bold mb-4">{{ __('frontend.selected_vehicle') }}</h3>
-            <div class="bg-gray-200 h-32 flex items-center justify-center text-5xl mb-4 rounded">🚗</div>
+            <div class="h-32 flex items-center justify-center mb-4 rounded overflow-hidden bg-gray-200">
+                @if($s1Image)
+                    <img src="{{ Storage::url($s1Image) }}" alt="{{ $vehicle->brand }} {{ $vehicle->model }}" class="w-full h-full object-cover">
+                @else
+                    <span class="text-5xl">🚗</span>
+                @endif
+            </div>
             <h4 class="font-bold text-lg">{{ $vehicle->brand }} {{ $vehicle->model }}</h4>
             <p class="text-gray-500 text-sm mb-4">{{ $vehicle->year }} • {{ __("frontend.{$vehicle->transmission}") }}</p>
 

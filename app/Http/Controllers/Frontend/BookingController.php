@@ -22,11 +22,29 @@ class BookingController extends Controller
         $days = (strtotime($returnDate) - strtotime($pickupDate)) / (60 * 60 * 24);
         $total = $vehicle->daily_rate * max(1, $days);
 
+        $request->session()->forget('booking_data');
+        $request->session()->put('booking_step', 1);
+
         return view('frontend.booking.step1', compact('vehicle', 'cities', 'pickupDate', 'returnDate', 'total', 'days'));
     }
 
     public function step2(Request $request)
     {
+        $bookingData = $request->session()->get('booking_data');
+
+        if ($bookingData && isset($bookingData['vehicle_id'])) {
+            $vehicle = Vehicle::findOrFail($bookingData['vehicle_id']);
+            $total = $bookingData['total'];
+            $gps = $bookingData['gps'] ?? false;
+            $childSeat = $bookingData['child_seat'] ?? false;
+            $additionalDriver = $bookingData['additional_driver'] ?? false;
+
+            $pickupDate = $bookingData['pickup_date'];
+            $returnDate = $bookingData['return_date'];
+
+            return view('frontend.booking.step2', compact('vehicle', 'pickupDate', 'returnDate', 'total', 'gps', 'childSeat', 'additionalDriver'));
+        }
+
         $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
             'pickup_city_id' => 'required|exists:cities,id',
@@ -66,16 +84,24 @@ class BookingController extends Controller
             'total' => $total,
         ]);
 
+        $request->session()->put('booking_step', 2);
+
         return view('frontend.booking.step2', compact('vehicle', 'pickupDate', 'returnDate', 'total', 'gps', 'childSeat', 'additionalDriver'));
     }
 
     public function step3(Request $request)
     {
+        if ($request->session()->get('booking_step') < 2) {
+            return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
+        }
+
         $bookingData = $request->session()->get('booking_data');
 
         if (! $bookingData || ! isset($bookingData['vehicle_id'])) {
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
         }
+
+        $request->session()->put('booking_step', 3);
 
         $vehicle = Vehicle::findOrFail($bookingData['vehicle_id']);
 
@@ -84,6 +110,10 @@ class BookingController extends Controller
 
     public function step4(Request $request)
     {
+        if ($request->session()->get('booking_step') < 3) {
+            return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
+        }
+
         if ($request->isMethod('post')) {
             $request->validate([
                 'id_document' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -105,6 +135,8 @@ class BookingController extends Controller
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
         }
 
+        $request->session()->put('booking_step', 4);
+
         $vehicle = Vehicle::findOrFail($bookingData['vehicle_id']);
         $cities = City::all();
 
@@ -113,6 +145,10 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->session()->get('booking_step') < 4) {
+            return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
+        }
+
         $bookingData = $request->session()->get('booking_data');
 
         if (! $bookingData || ! isset($bookingData['vehicle_id'])) {
@@ -120,7 +156,7 @@ class BookingController extends Controller
         }
 
         if ($this->isVehicleUnavailable($bookingData['vehicle_id'], $bookingData['pickup_date'], $bookingData['return_date'])) {
-            return redirect()->route('frontend.home')->with('error', __('frontend.vehicle_unavailable'));
+            return redirect()->back()->withErrors(['vehicle' => __('frontend.vehicle_unavailable')])->withInput();
         }
 
         $customer = Auth::user()->customer;

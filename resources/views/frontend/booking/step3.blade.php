@@ -58,7 +58,7 @@
             </div>
 
             <div class="flex gap-4">
-                <a href="{{ route('frontend.booking.step2', request()->query()) }}" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg text-center hover:bg-gray-400 font-bold">
+                <a href="{{ route('frontend.booking.step2') }}" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg text-center hover:bg-gray-400 font-bold">
                     ← {{ __('frontend.back') }}
                 </a>
                 <button type="submit" class="flex-1 bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-bold">
