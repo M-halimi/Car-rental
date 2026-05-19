@@ -3,8 +3,8 @@
 namespace App\Filament\Agency\Resources\VehicleResource\RelationManagers;
 
 use App\Models\Booking;
+use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -50,7 +50,7 @@ class BookingsRelationManager extends RelationManager
                     ->money('MAD'),
             ])
             ->actions([
-                ViewAction::make(),
+                EditAction::make(),
             ]);
     }
 }

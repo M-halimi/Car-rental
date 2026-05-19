@@ -3,8 +3,8 @@
 namespace App\Filament\Agency\Resources\CustomerResource\RelationManagers;
 
 use App\Models\Booking;
+use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -55,7 +55,7 @@ class BookingsRelationManager extends RelationManager
                 ->whereHas('vehicle', fn ($q) => $q->where('agency_id', $agencyId))
             )
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                EditAction::make(),
             ]);
     }
 }

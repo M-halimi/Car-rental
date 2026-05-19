@@ -71,11 +71,17 @@ class CustomerResource extends Resource
                             FileUpload::make('id_document_path')
                                 ->label('ID Card/Passport')
                                 ->image()
-                                ->directory('customers/documents'),
+                                ->visibility('public')
+                                ->directory('customers/documents')
+                                ->openable()
+                                ->downloadable(),
                             FileUpload::make('license_document_path')
                                 ->label('Driving License')
                                 ->image()
-                                ->directory('customers/documents'),
+                                ->visibility('public')
+                                ->directory('customers/documents')
+                                ->openable()
+                                ->downloadable(),
                         ]),
                     ]),
                 Section::make('Verification')
@@ -181,6 +187,9 @@ class CustomerResource extends Resource
         }
 
         return parent::getEloquentQuery()
-            ->whereHas('bookings', fn ($query) => $query->whereHas('vehicle', fn ($q) => $q->where('agency_id', $user->agency->id)));
+            ->where(function ($query) use ($user) {
+                $query->whereHas('bookings.vehicle', fn ($q) => $q->where('agency_id', $user->agency->id))
+                    ->orWhereDoesntHave('bookings');
+            });
     }
 }

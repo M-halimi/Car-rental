@@ -82,25 +82,24 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" method="GET" class="space-y-3 mb-4">
+                    <form action="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" method="GET" class="space-y-3 mb-4" id="bookingForm">
                         <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.pickup_date') }}</label>
-                                <input type="date" name="pickup_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                                <input type="date" name="pickup_date" id="pickup_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+1 day')) }}"
                                     class="w-full border border-gray-300 rounded-lg p-2 text-sm">
                             </div>
                             <div>
                                 <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.return_date') }}</label>
-                                <input type="date" name="return_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+3 days')) }}"
+                                <input type="date" name="return_date" id="return_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+3 days')) }}"
                                     class="w-full border border-gray-300 rounded-lg p-2 text-sm">
                             </div>
                         </div>
+                        <button type="submit" class="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 font-bold text-lg">
+                            {{ __('frontend.book_now') }}
+                        </button>
                     </form>
-
-                    <a href="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" class="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 font-bold text-lg">
-                        {{ __('frontend.book_now') }}
-                    </a>
                 </div>
             </div>
         </div>

@@ -45,6 +45,10 @@ class BookingController extends Controller
             return view('frontend.booking.step2', compact('vehicle', 'pickupDate', 'returnDate', 'total', 'gps', 'childSeat', 'additionalDriver'));
         }
 
+        if ($request->isMethod('get')) {
+            return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
+        }
+
         $request->validate([
             'vehicle_id' => 'required|exists:vehicles,id',
             'pickup_city_id' => 'required|exists:cities,id',
@@ -53,7 +57,9 @@ class BookingController extends Controller
         ]);
 
         if ($this->isVehicleUnavailable($request->vehicle_id, $request->pickup_date, $request->return_date)) {
-            return redirect()->back()->withErrors(['vehicle' => __('frontend.vehicle_unavailable')])->withInput();
+            return redirect()->route('frontend.booking.step1', ['vehicle_id' => $request->vehicle_id])
+                ->withErrors(['vehicle' => __('frontend.vehicle_unavailable')])
+                ->withInput();
         }
 
         $vehicle = Vehicle::findOrFail($request->vehicle_id);
@@ -86,7 +92,7 @@ class BookingController extends Controller
 
         $request->session()->put('booking_step', 2);
 
-        return view('frontend.booking.step2', compact('vehicle', 'pickupDate', 'returnDate', 'total', 'gps', 'childSeat', 'additionalDriver'));
+        return redirect()->route('frontend.booking.step2');
     }
 
     public function step3(Request $request)
@@ -179,11 +185,14 @@ class BookingController extends Controller
             'return_city_id' => $bookingData['return_city_id'],
             'pickup_date' => $bookingData['pickup_date'],
             'return_date' => $bookingData['return_date'],
+            'price_per_day' => $bookingData['daily_rate'],
             'daily_rate' => $bookingData['daily_rate'],
             'total_days' => $bookingData['total_days'],
             'subtotal' => $bookingData['subtotal'],
-            'discount' => 0,
+            'extras_price' => $bookingData['extras_total'] ?? 0,
+            'total_price' => $bookingData['total'],
             'total_amount' => $bookingData['total'],
+            'discount' => 0,
             'status' => 'pending',
             'notes' => $request->notes,
         ]);
@@ -197,8 +206,15 @@ class BookingController extends Controller
 
     public function detail(int $id)
     {
+        $customer = Auth::user()?->customer;
+
+        if (! $customer) {
+            return redirect()->route('frontend.home')
+                ->with('error', __('frontend.customer_profile_not_found'));
+        }
+
         $booking = Booking::with('vehicle', 'customer', 'pickupCity', 'returnCity')
-            ->where('customer_id', Auth::user()->customer->id)
+            ->where('customer_id', $customer->id)
             ->findOrFail($id);
 
         return view('frontend.booking.detail', compact('booking'));
@@ -206,8 +222,15 @@ class BookingController extends Controller
 
     public function invoice(int $id)
     {
+        $customer = Auth::user()?->customer;
+
+        if (! $customer) {
+            return redirect()->route('frontend.home')
+                ->with('error', __('frontend.customer_profile_not_found'));
+        }
+
         $booking = Booking::with('vehicle', 'customer', 'pickupCity', 'returnCity')
-            ->where('customer_id', Auth::user()->customer->id)
+            ->where('customer_id', $customer->id)
             ->findOrFail($id);
 
         return view('frontend.booking.invoice', compact('booking'));

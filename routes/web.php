@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\LanguageController;
 use App\Http\Middleware\SetLocale;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(SetLocale::class)->group(function () {
@@ -35,3 +36,16 @@ Route::middleware(SetLocale::class)->group(function () {
 });
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
+
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/agency/booking/{id}/contract', function ($id) {
+        $booking = Booking::with(['vehicle', 'customer', 'customer.user', 'pickupCity', 'returnCity', 'vehicle.agency'])->findOrFail($id);
+
+        return view('filament.agency.resources.booking.pages.contract-pdf', [
+            'booking' => $booking,
+            'vehicle' => $booking->vehicle,
+            'customer' => $booking->customer,
+            'agency' => $booking->vehicle->agency,
+        ]);
+    })->name('agency.booking.contract');
+});

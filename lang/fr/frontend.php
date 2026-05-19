@@ -140,4 +140,6 @@ return [
     'discount' => 'Remise',
     'print' => 'Imprimer',
     'rental' => 'Location',
+    'file_not_found' => 'Fichier introuvable',
+    'no_agency' => 'Aucune agence attribuée. Veuillez contacter le support.',
 ];

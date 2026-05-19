@@ -44,19 +44,85 @@ class VehicleCalendar extends Page
         $end = $start->copy()->endOfMonth();
 
         $agencyId = Auth::user()?->agency?->id;
+
         if (! $agencyId) {
-            return [];
+            return [
+                'firstDayOfWeek' => 0,
+                'days' => [],
+                'events' => [],
+            ];
         }
 
-        $firstDayOfWeek = $start->dayOfWeek;
+        $firstDayOfWeek = (int) $start->dayOfWeek;
+        $vehicles = $this->loadVehiclesWithBookings($agencyId, $start, $end);
+        $period = CarbonPeriod::create($start, $end);
 
-        $vehiclesQuery = Vehicle::where('agency_id', $agencyId);
+        $days = [];
+        $events = [];
+
+        foreach ($period as $date) {
+            $dayStr = $date->format('Y-m-d');
+            $dayBookings = [];
+
+            foreach ($vehicles as $vehicle) {
+                foreach ($vehicle->bookings as $booking) {
+                    $pickup = Carbon::parse($booking->pickup_date)->startOfDay();
+                    $return = Carbon::parse($booking->return_date)->endOfDay();
+
+                    if ($date->between($pickup, $return)) {
+                        $label = "{$vehicle->brand} {$vehicle->model}";
+                        $customer = $booking->customer?->user?->name ?? 'N/A';
+
+                        $dayBookings[] = [
+                            'vehicle_id' => $vehicle->id,
+                            'vehicle' => $label,
+                            'plate' => $vehicle->plate_number,
+                            'booking_id' => $booking->id,
+                            'status' => $booking->status,
+                            'customer' => $customer,
+                        ];
+
+                        $events[] = [
+                            'title' => "{$label} - {$customer}",
+                            'start' => $dayStr,
+                            'allDay' => true,
+                            'extendedProps' => [
+                                'status' => $booking->status,
+                                'vehicle' => $label,
+                                'customer' => $customer,
+                                'plate' => $vehicle->plate_number,
+                            ],
+                        ];
+                    }
+                }
+            }
+
+            $days[$dayStr] = [
+                'day' => $date->day,
+                'isToday' => $date->isToday(),
+                'isPast' => $date->isPast(),
+                'isWeekend' => $date->isWeekend(),
+                'bookings' => $dayBookings,
+            ];
+        }
+
+        return [
+            'firstDayOfWeek' => $firstDayOfWeek,
+            'days' => $days,
+            'events' => $events,
+            'initialDate' => $start->format('Y-m-d'),
+        ];
+    }
+
+    protected function loadVehiclesWithBookings(int $agencyId, Carbon $start, Carbon $end)
+    {
+        $query = Vehicle::where('agency_id', $agencyId);
 
         if ($this->vehicleId) {
-            $vehiclesQuery->where('id', $this->vehicleId);
+            $query->where('id', $this->vehicleId);
         }
 
-        $vehicles = $vehiclesQuery->with(['bookings' => function ($query) use ($start, $end) {
+        return $query->with(['bookings' => function ($query) use ($start, $end) {
             $query->where(function ($q) use ($start, $end) {
                 $q->whereBetween('pickup_date', [$start, $end])
                     ->orWhereBetween('return_date', [$start, $end])
@@ -66,44 +132,6 @@ class VehicleCalendar extends Page
                     });
             })->whereIn('status', ['pending', 'confirmed', 'active']);
         }])->get();
-
-        $days = [];
-
-        foreach (CarbonPeriod::create($start, $end) as $date) {
-            $dayStr = $date->format('Y-m-d');
-            $days[$dayStr] = [
-                'date' => $date,
-                'day' => $date->day,
-                'isToday' => $date->isToday(),
-                'isPast' => $date->isPast(),
-                'isWeekend' => $date->isWeekend(),
-                'isCurrentMonth' => $date->month === (int) $this->month,
-                'bookings' => [],
-            ];
-
-            foreach ($vehicles as $vehicle) {
-                foreach ($vehicle->bookings as $booking) {
-                    $pickup = Carbon::parse($booking->pickup_date)->startOfDay();
-                    $return = Carbon::parse($booking->return_date)->endOfDay();
-
-                    if ($date->between($pickup, $return)) {
-                        $days[$dayStr]['bookings'][] = [
-                            'vehicle_id' => $vehicle->id,
-                            'vehicle' => "{$vehicle->brand} {$vehicle->model}",
-                            'plate' => $vehicle->plate_number,
-                            'booking_id' => $booking->id,
-                            'status' => $booking->status,
-                            'customer' => $booking->customer?->user?->name ?? 'N/A',
-                        ];
-                    }
-                }
-            }
-        }
-
-        return [
-            'firstDayOfWeek' => $firstDayOfWeek,
-            'days' => $days,
-        ];
     }
 
     public function getVehiclesProperty(): array

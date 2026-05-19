@@ -18,6 +18,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -134,9 +135,14 @@ class VehicleResource extends Resource
                                 Section::make()->schema([
                                     FileUpload::make('images')
                                         ->disk('public')
-                                        ->label('Vehicle Image')
+                                        ->label('Vehicle Images')
                                         ->image()
-                                        ->directory('vehicles'),
+                                        ->multiple()
+                                        ->visibility('public')
+                                        ->directory('vehicles')
+                                        ->imagePreviewHeight('100')
+                                        ->reorderable()
+                                        ->openable(),
                                     Textarea::make('description')
                                         ->label('Description')
                                         ->rows(3),
@@ -150,6 +156,11 @@ class VehicleResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('images')
+                    ->disk('public')
+                    ->circular()
+                    ->stacked()
+                    ->size(60),
                 TextColumn::make('brand')
                     ->label('Brand')
                     ->searchable(),

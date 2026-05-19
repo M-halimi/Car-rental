@@ -140,4 +140,6 @@ return [
     'discount' => 'Discount',
     'print' => 'Print',
     'rental' => 'Rental',
+    'file_not_found' => 'File not found',
+    'no_agency' => 'No agency assigned. Please contact support.',
 ];

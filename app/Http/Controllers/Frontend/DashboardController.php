@@ -10,7 +10,17 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return redirect()->route('frontend.login');
+        }
+
         $customer = $user->customer;
+
+        if (! $customer) {
+            return redirect()->route('frontend.home')
+                ->with('error', __('Please complete your profile to access the dashboard.'));
+        }
 
         $bookings = $customer->bookings()
             ->with('vehicle')

@@ -147,10 +147,14 @@
                         </p>
                     </div>
                     @if ($customer->id_document_path)
+                        @if(\Illuminate\Support\Facades\Storage::disk('public')->exists($customer->id_document_path))
                         <a href="{{ Storage::url($customer->id_document_path) }}" target="_blank"
                             class="text-amber-600 hover:text-amber-700 text-sm font-medium">
                             {{ __('frontend.view_document') }}
                         </a>
+                        @else
+                        <span class="text-red-500 text-sm">{{ __('frontend.file_not_found') }}</span>
+                        @endif
                     @endif
                 </div>
 
@@ -166,10 +170,14 @@
                         </p>
                     </div>
                     @if ($customer->license_document_path)
+                        @if(\Illuminate\Support\Facades\Storage::disk('public')->exists($customer->license_document_path))
                         <a href="{{ Storage::url($customer->license_document_path) }}" target="_blank"
                             class="text-amber-600 hover:text-amber-700 text-sm font-medium">
                             {{ __('frontend.view_document') }}
                         </a>
+                        @else
+                        <span class="text-red-500 text-sm">{{ __('frontend.file_not_found') }}</span>
+                        @endif
                     @endif
                 </div>
             </div>
