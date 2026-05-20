@@ -2,18 +2,18 @@
 
 namespace App\Filament\Agency;
 
-use App\Filament\Agency\Pages\Auth\Login;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AgencyPanelProvider extends PanelProvider
@@ -23,7 +23,7 @@ class AgencyPanelProvider extends PanelProvider
         return $panel
             ->id('agency')
             ->path('agency')
-            ->login(Login::class)
+            ->login()
             ->colors([
                 'primary' => Color::Amber,
                 'gray' => Color::Zinc,
@@ -35,28 +35,16 @@ class AgencyPanelProvider extends PanelProvider
             ->discoverPages(in: __DIR__.'/Pages', for: 'App\\Filament\\Agency\\Pages')
             ->discoverWidgets(in: __DIR__.'/Widgets', for: 'App\\Filament\\Agency\\Widgets')
             ->middleware([
-                VerifyCsrfToken::class,
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
+                PreventRequestForgery::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->authMiddleware([
-                \Filament\Http\Middleware\AuthenticateSession::class,
-                Authenticate::class,
-            ]);
-    }
-
-    public function getUserPanelId(): ?string
-    {
-        $user = Auth::user();
-
-        if (! $user || ! $user->agency) {
-            return null;
-        }
-
-        return 'agency';
+            ->authMiddleware([Authenticate::class]);
     }
 }

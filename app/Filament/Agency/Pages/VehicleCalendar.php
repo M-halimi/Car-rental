@@ -134,6 +134,38 @@ class VehicleCalendar extends Page
         }])->get();
     }
 
+    public function getVehicleStock(int $vehicleId): array
+    {
+        $vehicle = Vehicle::find($vehicleId);
+
+        if (! $vehicle) {
+            return ['total' => 0, 'booked' => 0, 'available' => 0];
+        }
+
+        $start = Carbon::createFromDate((int) $this->year, (int) $this->month, 1);
+        $end = $start->copy()->endOfMonth();
+
+        $booked = $vehicle->bookings()
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('pickup_date', [$start, $end])
+                    ->orWhereBetween('return_date', [$start, $end])
+                    ->orWhere(function ($sub) use ($start, $end) {
+                        $sub->where('pickup_date', '<=', $start)
+                            ->where('return_date', '>=', $end);
+                    });
+            })
+            ->whereIn('status', ['pending', 'confirmed', 'active'])
+            ->count();
+
+        $total = $vehicle->quantity ?? 1;
+
+        return [
+            'total' => $total,
+            'booked' => $booked,
+            'available' => max(0, $total - $booked),
+        ];
+    }
+
     public function getVehiclesProperty(): array
     {
         $agencyId = Auth::user()?->agency?->id;
@@ -143,7 +175,11 @@ class VehicleCalendar extends Page
 
         return Vehicle::where('agency_id', $agencyId)
             ->get()
-            ->map(fn ($v) => ['id' => $v->id, 'label' => "{$v->brand} {$v->model} - {$v->plate_number}"])
+            ->map(fn ($v) => [
+                'id' => $v->id,
+                'label' => "{$v->brand} {$v->model} - {$v->plate_number}",
+                'quantity' => $v->quantity ?? 1,
+            ])
             ->toArray();
     }
 

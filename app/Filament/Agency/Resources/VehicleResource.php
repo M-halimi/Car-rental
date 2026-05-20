@@ -107,13 +107,19 @@ class VehicleResource extends Resource
                                         ->label('Color'),
                                 ]),
 
-                                Grid::make(2)->schema([
+                                Grid::make(3)->schema([
                                     TextInput::make('doors')
                                         ->label('Doors')
                                         ->numeric(),
                                     TextInput::make('seats')
                                         ->label('Seats')
                                         ->numeric(),
+                                    TextInput::make('quantity')
+                                        ->label('Stock Quantity')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->default(1)
+                                        ->helperText('Number of identical units available'),
                                 ]),
                                 TextInput::make('price_per_day')
                                     ->label('Price per Day (MAD)')
@@ -173,6 +179,14 @@ class VehicleResource extends Resource
                     ->label('Category'),
                 TextColumn::make('city.name')
                     ->label('City'),
+                TextColumn::make('quantity')
+                    ->label('Stock')
+                    ->badge()
+                    ->color(fn ($record): string => match (true) {
+                        ($record->quantity ?? 1) > 5 => 'success',
+                        ($record->quantity ?? 1) > 1 => 'warning',
+                        default => 'gray',
+                    }),
                 TextColumn::make('price_per_day')
                     ->label('Price/Day')
                     ->money('MAD'),

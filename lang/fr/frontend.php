@@ -142,4 +142,11 @@ return [
     'rental' => 'Location',
     'file_not_found' => 'Fichier introuvable',
     'no_agency' => 'Aucune agence attribuée. Veuillez contacter le support.',
+    'fully_booked' => 'Complet',
+    'only_left' => 'Plus que :count disponible(s)',
+    'only_left_short' => 'Plus que',
+    'checking_availability' => 'Vérification de la disponibilité...',
+    'select_dates_prompt' => 'Veuillez sélectionner les dates de retrait et de retour',
+    'return_after_pickup' => 'La date de retour doit être après la date de retrait',
+    'availability_error' => 'Impossible de vérifier la disponibilité. Veuillez réessayer.',
 ];

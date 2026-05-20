@@ -142,4 +142,11 @@ return [
     'rental' => 'تأجير',
     'file_not_found' => 'الملف غير موجود',
     'no_agency' => 'لم يتم تعيين وكالة. يرجى الاتصال بالدعم.',
+    'fully_booked' => 'محجوز بالكامل',
+    'only_left' => 'بقيت :count فقط',
+    'only_left_short' => 'بقيت',
+    'checking_availability' => 'جارٍ التحقق من التوفر...',
+    'select_dates_prompt' => 'يرجى تحديد تاريخي الاستلام والإرجاع',
+    'return_after_pickup' => 'يجب أن يكون تاريخ الإرجاع بعد تاريخ الاستلام',
+    'availability_error' => 'تعذر التحقق من التوفر. يرجى المحاولة مرة أخرى.',
 ];

@@ -19,7 +19,7 @@ class DashboardController extends Controller
 
         if (! $customer) {
             return redirect()->route('frontend.home')
-                ->with('error', __('Please complete your profile to access the dashboard.'));
+                ->with('error', 'Customer profile not found.');
         }
 
         $bookings = $customer->bookings()

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Booking;
 use App\Models\City;
 use App\Models\Vehicle;
+use App\Services\AvailabilityService;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -21,11 +21,13 @@ class HomeController extends Controller
         return view('frontend.index', compact('cities'));
     }
 
-    public function vehicles(Request $request)
+    public function vehicles(Request $request, AvailabilityService $availabilityService)
     {
         $cities = City::all();
 
-        $query = Vehicle::with('agency', 'city')->where('status', 'available')->where('is_active', true);
+        $query = Vehicle::with('agency', 'city')
+            ->where('status', 'available')
+            ->where('is_active', true);
 
         if ($request->city_id) {
             $query->where('city_id', $request->city_id);
@@ -55,32 +57,76 @@ class HomeController extends Controller
             $query->where('fuel_type', $request->fuel_type);
         }
 
-        if ($request->pickup_date && $request->return_date) {
-            $unavailableIds = Booking::whereIn('status', ['pending', 'confirmed', 'active'])
-                ->where(function ($q) use ($request) {
-                    $q->whereBetween('pickup_date', [$request->pickup_date, $request->return_date])
-                        ->orWhereBetween('return_date', [$request->pickup_date, $request->return_date])
-                        ->orWhere(function ($sub) use ($request) {
-                            $sub->where('pickup_date', '<=', $request->pickup_date)
-                                ->where('return_date', '>=', $request->return_date);
-                        });
-                })
-                ->pluck('vehicle_id');
+        $vehicles = $query->orderBy('daily_rate')->get();
 
-            $query->whereNotIn('id', $unavailableIds);
+        if ($request->pickup_date && $request->return_date) {
+            $unavailableIds = $availabilityService->getUnavailableVehicleIds(
+                $request->pickup_date,
+                $request->return_date
+            );
+
+            $vehicles = $vehicles->reject(fn ($v) => in_array($v->id, $unavailableIds));
+
+            $vehicles = $availabilityService->attachStockData(
+                $vehicles,
+                $request->pickup_date,
+                $request->return_date
+            );
+        } else {
+            foreach ($vehicles as $vehicle) {
+                $vehicle->available_stock = $vehicle->quantity ?? 1;
+            }
         }
 
-        $vehicles = $query->orderBy('daily_rate')->get();
         $brands = Vehicle::distinct()->pluck('brand')->sort();
 
         return view('frontend.vehicles', compact('vehicles', 'cities', 'brands'));
     }
 
-    public function vehicleDetail($id)
+    public function vehicleDetail($id, Request $request, AvailabilityService $availabilityService)
     {
         $vehicle = Vehicle::with('agency', 'city')->findOrFail($id);
 
-        return view('frontend.vehicle-detail', compact('vehicle'));
+        $pickupDate = $request->pickup_date ?? now()->addDay()->format('Y-m-d');
+        $returnDate = $request->return_date ?? now()->addDays(3)->format('Y-m-d');
+
+        $availability = $vehicle->getAvailabilityForDates($pickupDate, $returnDate);
+
+        return view('frontend.vehicle-detail', compact('vehicle', 'availability', 'pickupDate', 'returnDate'));
+    }
+
+    public function checkAvailability(int $vehicle, Request $request, AvailabilityService $availabilityService)
+    {
+        $request->validate([
+            'pickup_date' => 'required|date',
+            'return_date' => 'required|date|after:pickup_date',
+        ]);
+
+        $stock = $availabilityService->getAvailableStock(
+            $vehicle,
+            $request->pickup_date,
+            $request->return_date
+        );
+
+        $status = $availabilityService->getAvailabilityStatus(
+            $vehicle,
+            $request->pickup_date,
+            $request->return_date
+        );
+
+        $vehicleModel = Vehicle::find($vehicle);
+
+        return response()->json([
+            'available' => $stock > 0,
+            'stock' => $stock,
+            'status' => $status,
+            'total' => $vehicleModel?->quantity ?? 1,
+            'label' => $stock <= 0
+                ? __('frontend.fully_booked')
+                : ($stock < ($vehicleModel?->quantity ?? 1)
+                    ? __('frontend.only_left', ['count' => $stock])
+                    : __('frontend.available')),
+        ]);
     }
 
     public function compare(Request $request)

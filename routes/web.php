@@ -6,38 +6,36 @@ use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Frontend\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\LanguageController;
-use App\Http\Middleware\SetLocale;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(SetLocale::class)->group(function () {
-    Route::get('/', [HomeController::class, 'index'])->name('frontend.home');
-    Route::get('/vehicles', [HomeController::class, 'vehicles'])->name('frontend.vehicles');
-    Route::get('/vehicle/{id}', [HomeController::class, 'vehicleDetail'])->name('frontend.vehicle.detail');
-    Route::get('/compare', [HomeController::class, 'compare'])->name('frontend.compare');
+Route::get('/', [HomeController::class, 'index'])->name('frontend.home');
+Route::get('/vehicles', [HomeController::class, 'vehicles'])->name('frontend.vehicles');
+Route::get('/vehicle/{id}', [HomeController::class, 'vehicleDetail'])->name('frontend.vehicle.detail');
+Route::get('/compare', [HomeController::class, 'compare'])->name('frontend.compare');
+Route::get('/check-availability/{vehicle}', [HomeController::class, 'checkAvailability'])->name('frontend.availability.check');
 
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');
-    Route::post('/login', [LoginController::class, 'login']);
-    Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('frontend.register');
-    Route::post('/register', [RegisterController::class, 'register']);
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('frontend.register');
+Route::post('/register', [RegisterController::class, 'register']);
 
-    Route::middleware('auth')->group(function () {
-        Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
-        Route::match(['get', 'post'], '/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
-        Route::match(['get', 'post'], '/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
-        Route::match(['get', 'post'], '/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
-        Route::post('/booking/store', [BookingController::class, 'store'])->name('frontend.booking.store');
-        Route::get('/booking/{id}', [BookingController::class, 'detail'])->name('frontend.booking.detail');
-        Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('frontend.booking.invoice');
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
+    Route::match(['get', 'post'], '/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
+    Route::match(['get', 'post'], '/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
+    Route::match(['get', 'post'], '/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
+    Route::post('/booking/store', [BookingController::class, 'store'])->name('frontend.booking.store');
+    Route::get('/booking/{id}', [BookingController::class, 'detail'])->name('frontend.booking.detail');
+    Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('frontend.booking.invoice');
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('frontend.dashboard');
-    });
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('frontend.dashboard');
 });
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['auth', 'role:agency'])->group(function () {
     Route::get('/agency/booking/{id}/contract', function ($id) {
         $booking = Booking::with(['vehicle', 'customer', 'customer.user', 'pickupCity', 'returnCity', 'vehicle.agency'])->findOrFail($id);
 

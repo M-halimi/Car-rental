@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Services\AvailabilityService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -29,6 +32,8 @@ class Booking extends Model
         'status',
         'notes',
     ];
+
+    private const array ACTIVE_STATUSES = ['pending', 'confirmed', 'active'];
 
     protected static function booted(): void
     {
@@ -60,6 +65,27 @@ class Booking extends Model
                 $booking->deposit_amount = $booking->price_per_day ?? 0;
             }
         });
+
+        static::creating(function (Booking $booking) {
+            if ($booking->pickup_date && $booking->return_date && $booking->vehicle_id) {
+                $pickupDate = $booking->pickup_date instanceof Carbon
+                    ? $booking->pickup_date->format('Y-m-d')
+                    : $booking->pickup_date;
+                $returnDate = $booking->return_date instanceof Carbon
+                    ? $booking->return_date->format('Y-m-d')
+                    : $booking->return_date;
+
+                $pickupDate = is_string($pickupDate) ? $pickupDate : date('Y-m-d', strtotime($pickupDate));
+                $returnDate = is_string($returnDate) ? $returnDate : date('Y-m-d', strtotime($returnDate));
+
+                $service = app(AvailabilityService::class);
+                $stock = $service->getAvailableStock($booking->vehicle_id, $pickupDate, $returnDate);
+
+                if ($stock <= 0) {
+                    throw new \RuntimeException(__('frontend.vehicle_unavailable'));
+                }
+            }
+        });
     }
 
     protected function casts(): array
@@ -88,5 +114,22 @@ class Booking extends Model
     public function returnCity(): BelongsTo
     {
         return $this->belongsTo(City::class, 'return_city_id');
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->whereIn('status', self::ACTIVE_STATUSES);
+    }
+
+    public function scopeOverlapping(Builder $query, string $pickupDate, string $returnDate): Builder
+    {
+        return $query->where(function ($q) use ($pickupDate, $returnDate) {
+            $q->whereBetween('pickup_date', [$pickupDate, $returnDate])
+                ->orWhereBetween('return_date', [$pickupDate, $returnDate])
+                ->orWhere(function ($sub) use ($pickupDate, $returnDate) {
+                    $sub->where('pickup_date', '<=', $pickupDate)
+                        ->where('return_date', '>=', $returnDate);
+                });
+        });
     }
 }

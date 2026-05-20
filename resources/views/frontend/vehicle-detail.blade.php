@@ -39,7 +39,17 @@
                         <h1 class="text-3xl font-bold text-gray-800">{{ $vehicle->brand }} {{ $vehicle->model }}</h1>
                         <p class="text-gray-500">{{ $vehicle->year }} • {{ $vehicle->color }}</p>
                     </div>
-                    <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded">{{ __('frontend.available') }}</span>
+                    <div x-data="{ status: '{{ $availability['status'] }}', stock: {{ $availability['stock'] }}, total: {{ $availability['total'] }} }">
+                        <template x-if="status === 'available'">
+                            <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded font-medium">{{ __('frontend.available') }}</span>
+                        </template>
+                        <template x-if="status === 'limited'">
+                            <span class="bg-orange-100 text-orange-800 text-sm px-3 py-1 rounded font-medium" x-text="'{{ __('frontend.only_left_short', ['count' => '']) }} '.trim() + stock"></span>
+                        </template>
+                        <template x-if="status === 'booked'">
+                            <span class="bg-red-100 text-red-800 text-sm px-3 py-1 rounded font-medium">{{ __('frontend.fully_booked') }}</span>
+                        </template>
+                    </div>
                 </div>
 
                 <div class="mb-6">
@@ -82,24 +92,39 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" method="GET" class="space-y-3 mb-4" id="bookingForm">
-                        <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.pickup_date') }}</label>
-                                <input type="date" name="pickup_date" id="pickup_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                                    class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                    <div
+                        x-data="availabilityChecker({{ $vehicle->id }}, '{{ $pickupDate }}', '{{ $returnDate }}')"
+                        x-init="init()"
+                    >
+                        <form action="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}" method="GET" class="space-y-3 mb-4">
+                            <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.pickup_date') }}</label>
+                                    <input type="date" name="pickup_date" x-model="pickupDate" x-on:change="checkAvailability" min="{{ date('Y-m-d') }}"
+                                        class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.return_date') }}</label>
+                                    <input type="date" name="return_date" x-model="returnDate" x-on:change="checkAvailability" min="{{ date('Y-m-d') }}"
+                                        class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-gray-600 text-xs font-bold mb-1">{{ __('frontend.return_date') }}</label>
-                                <input type="date" name="return_date" id="return_date" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d', strtotime('+3 days')) }}"
-                                    class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-                            </div>
-                        </div>
-                        <button type="submit" class="block w-full bg-green-600 text-white text-center py-3 rounded-lg hover:bg-green-700 font-bold text-lg">
-                            {{ __('frontend.book_now') }}
-                        </button>
-                    </form>
+
+                            <div x-show="message" x-text="message" class="text-sm font-medium" :class="{'text-green-600': available, 'text-orange-600': !available && stock > 0, 'text-red-600': !available}" style="display: none;"></div>
+
+                            <template x-if="loading">
+                                <div class="text-center text-gray-400 text-sm py-2">{{ __('frontend.checking_availability') }}</div>
+                            </template>
+
+                            <button type="submit"
+                                x-bind:disabled="!available || loading"
+                                x-bind:class="available ? 'bg-green-600 hover:bg-green-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'"
+                                class="block w-full text-black text-center py-3 rounded-lg font-bold text-lg bg-green-600 hover:bg-green-700 transition">
+                                {{ __('frontend.book_now') }}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,4 +136,60 @@
         </a>
     </div>
 </div>
-@endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('availabilityChecker', (vehicleId, initialPickup, initialReturn) => ({
+            vehicleId: vehicleId,
+            pickupDate: initialPickup,
+            returnDate: initialReturn,
+            available: true,
+            stock: 0,
+            total: 0,
+            message: '',
+            loading: false,
+            debounceTimer: null,
+
+            init() {
+                this.checkAvailability();
+            },
+
+            checkAvailability() {
+                if (!this.pickupDate || !this.returnDate) {
+                    this.available = false;
+                    this.message = '{{ __('frontend.select_dates_prompt') }}';
+                    return;
+                }
+                if (this.returnDate <= this.pickupDate) {
+                    this.available = false;
+                    this.message = '{{ __('frontend.return_after_pickup') }}';
+                    return;
+                }
+
+                if (this.debounceTimer) clearTimeout(this.debounceTimer);
+
+                this.loading = true;
+
+                this.debounceTimer = setTimeout(() => {
+                    fetch('{{ route('frontend.availability.check', $vehicle->id) }}?pickup_date=' + this.pickupDate + '&return_date=' + this.returnDate)
+                        .then(r => r.json())
+                        .then(data => {
+                            this.available = data.available;
+                            this.stock = data.stock;
+                            this.total = data.total;
+                            this.message = data.label;
+                            this.loading = false;
+                        })
+                        .catch(() => {
+                            this.available = false;
+                            this.message = '{{ __('frontend.availability_error') }}';
+                            this.loading = false;
+                        });
+                }, 400);
+            }
+        }));
+    });
+</script>
+@endpush
+@endSection

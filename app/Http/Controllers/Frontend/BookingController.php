@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\City;
 use App\Models\Vehicle;
+use App\Services\AvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
-    public function step1(Request $request)
+    public function step1(Request $request, AvailabilityService $availabilityService)
     {
         $vehicle = Vehicle::with('agency', 'city')->findOrFail($request->vehicle_id);
         $cities = City::all();
@@ -19,16 +20,23 @@ class BookingController extends Controller
         $pickupDate = $request->pickup_date ?? now()->addDay()->format('Y-m-d');
         $returnDate = $request->return_date ?? now()->addDays(3)->format('Y-m-d');
 
+        $availability = $vehicle->getAvailabilityForDates($pickupDate, $returnDate);
+
+        if ($availability['stock'] <= 0) {
+            return redirect()->route('frontend.vehicles', $request->query())
+                ->withErrors(['vehicle' => __('frontend.vehicle_unavailable')]);
+        }
+
         $days = (strtotime($returnDate) - strtotime($pickupDate)) / (60 * 60 * 24);
         $total = $vehicle->daily_rate * max(1, $days);
 
         $request->session()->forget('booking_data');
         $request->session()->put('booking_step', 1);
 
-        return view('frontend.booking.step1', compact('vehicle', 'cities', 'pickupDate', 'returnDate', 'total', 'days'));
+        return view('frontend.booking.step1', compact('vehicle', 'cities', 'pickupDate', 'returnDate', 'total', 'days', 'availability'));
     }
 
-    public function step2(Request $request)
+    public function step2(Request $request, AvailabilityService $availabilityService)
     {
         $bookingData = $request->session()->get('booking_data');
 
@@ -56,7 +64,13 @@ class BookingController extends Controller
             'return_date' => 'required|date|after:pickup_date',
         ]);
 
-        if ($this->isVehicleUnavailable($request->vehicle_id, $request->pickup_date, $request->return_date)) {
+        $stock = $availabilityService->getAvailableStock(
+            $request->vehicle_id,
+            $request->pickup_date,
+            $request->return_date
+        );
+
+        if ($stock <= 0) {
             return redirect()->route('frontend.booking.step1', ['vehicle_id' => $request->vehicle_id])
                 ->withErrors(['vehicle' => __('frontend.vehicle_unavailable')])
                 ->withInput();
@@ -114,7 +128,7 @@ class BookingController extends Controller
         return view('frontend.booking.step3', compact('vehicle', 'bookingData'));
     }
 
-    public function step4(Request $request)
+    public function step4(Request $request, AvailabilityService $availabilityService)
     {
         if ($request->session()->get('booking_step') < 3) {
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
@@ -141,6 +155,17 @@ class BookingController extends Controller
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
         }
 
+        $stock = $availabilityService->getAvailableStock(
+            $bookingData['vehicle_id'],
+            $bookingData['pickup_date'],
+            $bookingData['return_date']
+        );
+
+        if ($stock <= 0) {
+            return redirect()->route('frontend.home')
+                ->withErrors(['vehicle' => __('frontend.vehicle_unavailable')]);
+        }
+
         $request->session()->put('booking_step', 4);
 
         $vehicle = Vehicle::findOrFail($bookingData['vehicle_id']);
@@ -149,7 +174,7 @@ class BookingController extends Controller
         return view('frontend.booking.step4', compact('vehicle', 'bookingData', 'cities'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, AvailabilityService $availabilityService)
     {
         if ($request->session()->get('booking_step') < 4) {
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
@@ -161,8 +186,14 @@ class BookingController extends Controller
             return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
         }
 
-        if ($this->isVehicleUnavailable($bookingData['vehicle_id'], $bookingData['pickup_date'], $bookingData['return_date'])) {
-            return redirect()->back()->withErrors(['vehicle' => __('frontend.vehicle_unavailable')])->withInput();
+        $stock = $availabilityService->getAvailableStock(
+            $bookingData['vehicle_id'],
+            $bookingData['pickup_date'],
+            $bookingData['return_date']
+        );
+
+        if ($stock <= 0) {
+            return redirect()->back()->withErrors(['vehicle' => __('frontend.vehicle_unavailable')]);
         }
 
         $customer = Auth::user()->customer;
@@ -178,24 +209,28 @@ class BookingController extends Controller
             ]);
         }
 
-        $booking = Booking::create([
-            'vehicle_id' => $bookingData['vehicle_id'],
-            'customer_id' => $customer->id,
-            'pickup_city_id' => $bookingData['pickup_city_id'],
-            'return_city_id' => $bookingData['return_city_id'],
-            'pickup_date' => $bookingData['pickup_date'],
-            'return_date' => $bookingData['return_date'],
-            'price_per_day' => $bookingData['daily_rate'],
-            'daily_rate' => $bookingData['daily_rate'],
-            'total_days' => $bookingData['total_days'],
-            'subtotal' => $bookingData['subtotal'],
-            'extras_price' => $bookingData['extras_total'] ?? 0,
-            'total_price' => $bookingData['total'],
-            'total_amount' => $bookingData['total'],
-            'discount' => 0,
-            'status' => 'pending',
-            'notes' => $request->notes,
-        ]);
+        try {
+            $booking = Booking::create([
+                'vehicle_id' => $bookingData['vehicle_id'],
+                'customer_id' => $customer->id,
+                'pickup_city_id' => $bookingData['pickup_city_id'],
+                'return_city_id' => $bookingData['return_city_id'],
+                'pickup_date' => $bookingData['pickup_date'],
+                'return_date' => $bookingData['return_date'],
+                'price_per_day' => $bookingData['daily_rate'],
+                'daily_rate' => $bookingData['daily_rate'],
+                'total_days' => $bookingData['total_days'],
+                'subtotal' => $bookingData['subtotal'],
+                'extras_price' => $bookingData['extras_total'] ?? 0,
+                'total_price' => $bookingData['total'],
+                'total_amount' => $bookingData['total'],
+                'discount' => 0,
+                'status' => 'pending',
+                'notes' => $request->notes,
+            ]);
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withErrors(['vehicle' => $e->getMessage()]);
+        }
 
         $request->session()->forget('booking_data');
 
@@ -234,20 +269,5 @@ class BookingController extends Controller
             ->findOrFail($id);
 
         return view('frontend.booking.invoice', compact('booking'));
-    }
-
-    private function isVehicleUnavailable(int $vehicleId, string $pickupDate, string $returnDate): bool
-    {
-        return Booking::where('vehicle_id', $vehicleId)
-            ->whereIn('status', ['pending', 'confirmed', 'active'])
-            ->where(function ($query) use ($pickupDate, $returnDate) {
-                $query->whereBetween('pickup_date', [$pickupDate, $returnDate])
-                    ->orWhereBetween('return_date', [$pickupDate, $returnDate])
-                    ->orWhere(function ($q) use ($pickupDate, $returnDate) {
-                        $q->where('pickup_date', '<=', $pickupDate)
-                            ->where('return_date', '>=', $returnDate);
-                    });
-            })
-            ->exists();
     }
 }

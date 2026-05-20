@@ -90,6 +90,8 @@
                         @php
                             $vImages = is_array($vehicle->images) ? $vehicle->images : (json_decode($vehicle->images, true) ?? []);
                             $vImage = !empty($vImages) ? $vImages[0] : $vehicle->image_url;
+                            $stockStatus = $vehicle->stock_status;
+                            $stockLabel = $vehicle->stock_label;
                         @endphp
                         <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
                             @if($vImage)
@@ -102,7 +104,13 @@
                             <div class="p-6">
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-xl font-bold text-gray-800">{{ $vehicle->brand }} {{ $vehicle->model }}</h3>
-                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">{{ __('frontend.available') }}</span>
+                                    @if($stockStatus === 'available')
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">{{ __('frontend.available') }}</span>
+                                    @elseif($stockStatus === 'limited')
+                                        <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded font-medium">{{ $stockLabel }}</span>
+                                    @else
+                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-medium">{{ __('frontend.fully_booked') }}</span>
+                                    @endif
                                 </div>
                                 <p class="text-gray-600 text-sm mb-4">{{ $vehicle->year }} •
                                     @if($vehicle->transmission == 'automatic'){{ __('frontend.automatic') }}@else{{ __('frontend.manual') }}@endif •
@@ -120,7 +128,7 @@
                                         <span class="text-gray-500 text-sm">{{ __('frontend.per_day') }}</span>
                                     </div>
                                     <div class="flex gap-2">
-                                        <a href="{{ route('frontend.vehicle.detail', $vehicle->id) }}" class="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700">{{ __('frontend.view_details') }}</a>
+                                        <a href="{{ route('frontend.vehicle.detail', ['id' => $vehicle->id, 'pickup_date' => request('pickup_date'), 'return_date' => request('return_date')]) }}" class="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700">{{ __('frontend.view_details') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -131,4 +139,4 @@
         </main>
     </div>
 </div>
-@endsection
+@endSection

@@ -142,4 +142,11 @@ return [
     'rental' => 'Rental',
     'file_not_found' => 'File not found',
     'no_agency' => 'No agency assigned. Please contact support.',
+    'fully_booked' => 'Fully Booked',
+    'only_left' => 'Only :count left',
+    'only_left_short' => 'Only',
+    'checking_availability' => 'Checking availability...',
+    'select_dates_prompt' => 'Please select pickup and return dates',
+    'return_after_pickup' => 'Return date must be after pickup date',
+    'availability_error' => 'Unable to check availability. Please try again.',
 ];
