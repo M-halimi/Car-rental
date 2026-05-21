@@ -6,7 +6,10 @@ use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Frontend\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\LanguageController;
+use App\Livewire\Customer\PaymentHistoryPage;
 use App\Models\Booking;
+use App\Models\Payment;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('frontend.home');
@@ -31,11 +34,24 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('frontend.booking.invoice');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('frontend.dashboard');
+    Route::get('/account/payments', PaymentHistoryPage::class)->name('frontend.payments');
+    Route::get('/payment/{payment}/receipt', function (Payment $payment) {
+        $customer = auth()->user()?->customer;
+        abort_if($payment->booking->customer_id !== $customer?->id, 403);
+
+        $pdf = Pdf::loadView('receipts.payment', [
+            'payment' => $payment,
+            'booking' => $payment->booking,
+            'customer' => $payment->customer,
+        ]);
+
+        return $pdf->download("receipt-{$payment->id}.pdf");
+    })->name('frontend.payment.receipt');
 });
 
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
-Route::middleware(['auth', 'role:agency'])->group(function () {
+Route::middleware(['auth', 'role:agency,super_admin'])->group(function () {
     Route::get('/agency/booking/{id}/contract', function ($id) {
         $booking = Booking::with(['vehicle', 'customer', 'customer.user', 'pickupCity', 'returnCity', 'vehicle.agency'])->findOrFail($id);
 

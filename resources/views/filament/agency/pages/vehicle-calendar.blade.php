@@ -46,28 +46,40 @@
         }
     </style>
 
-    <div class="space-y-5">
+    <div class="space-y-6">
         {{-- Toolbar --}}
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <x-filament::button wire:click="previousMonth" icon="heroicon-m-chevron-left" size="sm" color="gray" outlined aria-label="Previous month" />
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 p-1 shadow-sm">
+                    <button wire:click="previousMonth" type="button"
+                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white hover:shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                        aria-label="Previous month">
+                        <x-filament::icon icon="heroicon-m-chevron-left" class="w-5 h-5" />
+                    </button>
+                    <button wire:click="nextMonth" type="button"
+                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white hover:shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                        aria-label="Next month">
+                        <x-filament::icon icon="heroicon-m-chevron-right" class="w-5 h-5" />
+                    </button>
+                </div>
 
-                <x-filament::button wire:click="nextMonth" icon="heroicon-m-chevron-right" size="sm" color="gray" outlined aria-label="Next month" />
-
-                <h2 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white min-w-[200px] text-center select-none">
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white min-w-[220px] text-center select-none tabular-nums">
                     {{ $this->monthName }}
                 </h2>
 
-                <x-filament::button wire:click="goToToday" size="sm" color="gray" outlined>
+                <button wire:click="goToToday" type="button"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:border-amber-300 dark:hover:border-amber-600 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/50 shadow-sm">
+                    <x-filament::icon icon="heroicon-m-calendar-days" class="w-4 h-4" />
                     Today
-                </x-filament::button>
+                </button>
             </div>
 
             <div class="flex items-center gap-3">
-                <label for="vehicleFilter" class="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap sr-only">
+                <label for="vehicleFilter" class="text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
                     Vehicle
                 </label>
-                <select id="vehicleFilter" wire:model.live="vehicleId" class="block w-full lg:w-72 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-amber-500 focus:ring-amber-500 py-2 pl-3 pr-10">
+                <select id="vehicleFilter" wire:model.live="vehicleId"
+                    class="block w-full lg:w-80 rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 py-2.5 pl-3.5 pr-10 transition-all duration-150">
                     <option value="">All Vehicles</option>
                     @foreach($this->vehicles as $v)
                         <option value="{{ $v['id'] }}">{{ $v['label'] }}</option>
@@ -77,24 +89,24 @@
         </div>
 
         {{-- Legend --}}
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3 border border-gray-200 dark:border-gray-700">
-            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mr-1">Legend</span>
-            <div class="flex items-center gap-1.5">
-                <span class="inline-block w-3 h-3 rounded-sm" style="background:#fecaca;border:1px solid #f87171"></span>
-                <span>Booked</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="inline-block w-3 h-3 rounded-sm" style="background:#bbf7d0;border:1px solid #4ade80"></span>
-                <span>Available</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="inline-block w-3 h-3 rounded-sm" style="background:#f3f4f6;border:1px solid #d1d5db"></span>
-                <span>Past</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="inline-block w-3 h-3 rounded-sm" style="background:#fef3c7;border:2px solid #f59e0b"></span>
-                <span>Today</span>
-            </div>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm bg-white dark:bg-gray-800/60 rounded-xl px-4 py-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mr-1">Legend</span>
+            <span class="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                <span class="inline-block w-3.5 h-3.5 rounded" style="background:#fecaca;border:1px solid #f87171"></span>
+                Booked
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                <span class="inline-block w-3.5 h-3.5 rounded" style="background:#bbf7d0;border:1px solid #4ade80"></span>
+                Available
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                <span class="inline-block w-3.5 h-3.5 rounded" style="background:#f3f4f6;border:1px solid #d1d5db"></span>
+                Past
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                <span class="inline-block w-3.5 h-3.5 rounded" style="background:#fef3c7;border:2px solid #f59e0b"></span>
+                Today
+            </span>
         </div>
 
         {{-- Calendar --}}

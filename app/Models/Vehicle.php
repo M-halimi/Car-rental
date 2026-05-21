@@ -4,12 +4,15 @@ namespace App\Models;
 
 use App\Services\AvailabilityService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vehicle extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'agency_id',
         'city_id',

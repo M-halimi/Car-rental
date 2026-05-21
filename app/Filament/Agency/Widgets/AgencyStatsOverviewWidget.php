@@ -18,38 +18,42 @@ class AgencyStatsOverviewWidget extends BaseWidget
             return [];
         }
 
-        $totalVehicles = Vehicle::where('agency_id', $agency->id)->count();
+        $agencyVehicleIds = Vehicle::where('agency_id', $agency->id)->pluck('id');
+
+        $totalVehicles = $agencyVehicleIds->count();
         $availableVehicles = Vehicle::where('agency_id', $agency->id)
             ->where('status', 'available')->count();
         $rentedVehicles = Vehicle::where('agency_id', $agency->id)
             ->where('status', 'rented')->count();
 
-        $totalBookings = Booking::whereHas('vehicle', fn ($query) => $query->where('agency_id', $agency->id)
-        )->count();
+        $activeBookings = Booking::forAgencyVehicles($agencyVehicleIds)
+            ->active()
+            ->count();
 
-        $pendingBookings = Booking::whereHas('vehicle', fn ($query) => $query->where('agency_id', $agency->id)
-        )->where('status', 'pending')->count();
+        $completedRentals = Booking::forAgencyVehicles($agencyVehicleIds)
+            ->completed()
+            ->count();
 
-        $totalRevenue = Booking::whereHas('vehicle', fn ($query) => $query->where('agency_id', $agency->id)
-        )->where('status', 'completed')
+        $totalRevenue = Booking::forAgencyVehicles($agencyVehicleIds)
+            ->whereRevenue()
             ->sum('total_price');
 
-        $pendingDeposits = Booking::whereHas('vehicle', fn ($query) => $query->where('agency_id', $agency->id)
-        )->where('deposit_status', 'pending')
-            ->sum('deposit_amount');
+        $pendingDeposits = Booking::forAgencyVehicles($agencyVehicleIds)
+            ->wherePendingDeposit()
+            ->sum('total_price');
 
         return [
             Stat::make('Total Vehicles', $totalVehicles)
                 ->description("$availableVehicles available, $rentedVehicles rented")
                 ->icon('heroicon-o-truck'),
-            Stat::make('Total Bookings', $totalBookings)
-                ->description("$pendingBookings pending")
+            Stat::make('Active Bookings', $activeBookings)
+                ->description('Pending, confirmed & active')
                 ->icon('heroicon-o-calendar'),
             Stat::make('Total Revenue', number_format($totalRevenue, 2).' MAD')
-                ->description('From completed rentals')
+                ->description("From $completedRentals completed rentals")
                 ->icon('heroicon-o-currency-dollar'),
             Stat::make('Pending Deposits', number_format($pendingDeposits, 2).' MAD')
-                ->description('Awaiting payment')
+                ->description('Awaiting completion & payment')
                 ->icon('heroicon-o-banknotes'),
         ];
     }

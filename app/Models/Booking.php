@@ -5,11 +5,16 @@ namespace App\Models;
 use App\Services\AvailabilityService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Booking extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'vehicle_id',
         'customer_id',
@@ -116,9 +121,48 @@ class Booking extends Model
         return $this->belongsTo(City::class, 'return_city_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereIn('status', self::ACTIVE_STATUSES);
+    }
+
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopeCancelled(Builder $query): Builder
+    {
+        return $query->where('status', 'cancelled');
+    }
+
+    public function scopeForAgency(Builder $query, int $agencyId): Builder
+    {
+        return $query->whereHas('vehicle', fn ($q) => $q->where('agency_id', $agencyId));
+    }
+
+    public function scopeForAgencyVehicles(Builder $query, array|Collection $vehicleIds): Builder
+    {
+        return $query->whereIn('vehicle_id', $vehicleIds);
+    }
+
+    public function scopeWhereRevenue(Builder $query): Builder
+    {
+        return $query
+            ->where('status', 'completed')
+            ->where('deposit_status', 'paid');
+    }
+
+    public function scopeWherePendingDeposit(Builder $query): Builder
+    {
+        return $query
+            ->where('status', '!=', 'cancelled')
+            ->where('deposit_status', '!=', 'paid');
     }
 
     public function scopeOverlapping(Builder $query, string $pickupDate, string $returnDate): Builder
