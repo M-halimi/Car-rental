@@ -7,8 +7,10 @@ use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+
 
 class PaymentsRelationManager extends RelationManager
 {
@@ -20,7 +22,8 @@ class PaymentsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
+        $user = Filament::auth()->user();
+
         $agencyId = $user?->agency?->id;
 
         return $table

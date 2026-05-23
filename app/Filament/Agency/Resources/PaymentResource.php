@@ -12,11 +12,12 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\auth\Facades\Filament;
 use Filament\Schemas\Schema;
+
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -49,7 +50,7 @@ class PaymentResource extends Resource
                                 ->getOptionLabelFromRecordUsing(fn ($record) => "Booking #{$record->id} - {$record?->customer?->user?->name}")
                                 ->required()
                                 ->live()
-                                ->afterStateUpdated(fn (Set $set, ?string $state) => $state ? $set('amount', Booking::find($state)?->total_price ?? 0) : null),
+                                ->afterStateUpdated(fn (callable  $set, ?string $state) => $state ? $set('amount', Booking::find($state)?->total_price ?? 0) : null),
                             TextInput::make('amount')
                                 ->label('Amount')
                                 ->numeric()
@@ -231,7 +232,7 @@ class PaymentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $user = auth()->user();
+        $user = Filament::auth()->user();
 
         if (! $user || ! $user->agency) {
             return parent::getEloquentQuery()->whereRaw('1 = 0');
