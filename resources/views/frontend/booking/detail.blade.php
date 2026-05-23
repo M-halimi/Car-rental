@@ -61,6 +61,96 @@
                     </div>
                 @endif
 
+                <div class="mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">{{ __('frontend.payment_summary') ?? 'Payment Summary' }}</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="text-center p-3 bg-white rounded-lg">
+                                <p class="text-sm text-gray-500">{{ __('frontend.amount_paid') ?? 'Amount Paid' }}</p>
+                                <p class="text-xl font-bold text-green-600">{{ number_format($totalPaid, 2) }} {{ __('frontend.dh') }}</p>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-lg">
+                                <p class="text-sm text-gray-500">{{ __('frontend.remaining_balance') ?? 'Remaining Balance' }}</p>
+                                <p class="text-xl font-bold {{ $remainingBalance > 0 ? 'text-red-600' : 'text-gray-600' }}">{{ number_format($remainingBalance, 2) }} {{ __('frontend.dh') }}</p>
+                            </div>
+                            <div class="text-center p-3 bg-white rounded-lg">
+                                <p class="text-sm text-gray-500">{{ __('frontend.deposit_status') ?? 'Deposit Status' }}</p>
+                                <span class="inline-block px-3 py-1 rounded-full text-sm font-medium
+                                    @switch($booking->deposit_status)
+                                        @case('paid') bg-green-100 text-green-700 @break
+                                        @case('refunded') bg-blue-100 text-blue-700 @break
+                                        @case('waived') bg-gray-100 text-gray-700 @break
+                                        @default bg-yellow-100 text-yellow-700
+                                    @endswitch">
+                                    {{ ucfirst($booking->deposit_status ?? 'pending') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        @if($remainingBalance > 0)
+                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                @php
+                                    $total = $booking->total_amount ?? 1;
+                                    $pct = min(100, ($totalPaid / $total) * 100);
+                                @endphp
+                                <div class="bg-amber-500 h-full rounded-full transition-all" style="width: {{ $pct }}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>{{ number_format($totalPaid, 2) }} {{ __('frontend.dh') }} {{ __('frontend.paid') ?? 'paid' }}</span>
+                                <span>{{ number_format($remainingBalance, 2) }} {{ __('frontend.dh') }} {{ __('frontend.remaining') ?? 'remaining' }}</span>
+                            </div>
+                        @else
+                            <div class="w-full bg-green-200 rounded-full h-3 overflow-hidden">
+                                <div class="bg-green-500 h-full rounded-full" style="width: 100%"></div>
+                            </div>
+                            <p class="text-green-600 text-sm mt-1 font-medium text-center">{{ __('frontend.fully_paid') ?? 'Fully Paid' }}</p>
+                        @endif
+                    </div>
+                </div>
+
+                @if($payments->count() > 0)
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">{{ __('frontend.payment_history') ?? 'Payment History' }}</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-200 text-gray-500 uppercase tracking-wider text-xs">
+                                        <th class="text-left py-3 px-2">{{ __('frontend.date') ?? 'Date' }}</th>
+                                        <th class="text-left py-3 px-2">{{ __('frontend.amount') ?? 'Amount' }}</th>
+                                        <th class="text-left py-3 px-2">{{ __('frontend.method') ?? 'Method' }}</th>
+                                        <th class="text-left py-3 px-2">{{ __('frontend.type') ?? 'Type' }}</th>
+                                        <th class="text-left py-3 px-2">{{ __('frontend.status') ?? 'Status' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach($payments as $payment)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="py-3 px-2">{{ ($payment->paid_at ?? $payment->created_at)->format('M d, Y') }}</td>
+                                            <td class="py-3 px-2 font-medium">{{ number_format($payment->amount, 2) }} {{ __('frontend.dh') }}</td>
+                                            <td class="py-3 px-2">{{ ucfirst(str_replace('_', ' ', $payment->payment_method)) }}</td>
+                                            <td class="py-3 px-2">{{ ucfirst($payment->payment_type) }}</td>
+                                            <td class="py-3 px-2">
+                                                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium
+                                                    @switch($payment->status)
+                                                        @case('completed') bg-green-100 text-green-700 @break
+                                                        @case('partial') bg-yellow-100 text-yellow-700 @break
+                                                        @case('pending') bg-gray-100 text-gray-700 @break
+                                                        @case('refunded') bg-blue-100 text-blue-700 @break
+                                                        @case('failed') bg-red-100 text-red-700 @break
+                                                        @case('overdue') bg-red-100 text-red-700 @break
+                                                        @default bg-gray-100 text-gray-600
+                                                    @endswitch">
+                                                    {{ ucfirst($payment->status) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="flex gap-4">
                     <a href="{{ route('frontend.dashboard') }}"
                         class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg text-center hover:bg-gray-400 font-bold">

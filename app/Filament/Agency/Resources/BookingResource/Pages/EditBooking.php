@@ -3,6 +3,7 @@
 namespace App\Filament\Agency\Resources\BookingResource\Pages;
 
 use App\Filament\Agency\Resources\BookingResource;
+use App\Filament\Agency\Resources\BookingResource\RelationManagers\PaymentsRelationManager;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -21,6 +22,13 @@ class EditBooking extends EditRecord
                 ->url(fn () => route('agency.booking.contract', $this->getRecord()->id))
                 ->openUrlInNewTab(),
             DeleteAction::make(),
+        ];
+    }
+
+    public function getRelationManagers(): array
+    {
+        return [
+            PaymentsRelationManager::class,
         ];
     }
 }

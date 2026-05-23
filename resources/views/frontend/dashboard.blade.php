@@ -33,8 +33,9 @@
             <div class="text-blue-600 font-medium">{{ __('frontend.total_rentals') }}</div>
         </div>
         <div class="bg-purple-50 rounded-xl p-6 text-center border border-purple-200">
-            <div class="text-3xl font-bold text-purple-700">★</div>
-            <div class="text-purple-600 font-medium">{{ __('frontend.loyalty_points') }}</div>
+            <div class="text-3xl font-bold text-purple-700">{{ number_format($totalPaid, 0) }}</div>
+            <div class="text-purple-600 font-medium">{{ __('frontend.total_paid') ?? 'Total Paid' }}</div>
+            <div class="text-xs text-purple-400 mt-1">{{ __('frontend.dh') }}</div>
         </div>
     </div>
 
@@ -132,55 +133,54 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-6">🪪 {{ __('frontend.my_documents') }}</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">💰 {{ __('frontend.payments') ?? 'Payments' }}</h2>
+                <a href="{{ route('frontend.payments') }}"
+                    class="text-amber-600 hover:text-amber-700 text-sm font-medium">
+                    {{ __('frontend.view_all') ?? 'View All' }} →
+                </a>
+            </div>
 
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                        <p class="font-medium text-gray-800">{{ __('frontend.document_id') }}</p>
-                        <p class="text-sm text-gray-500">
-                            @if ($customer->id_document_path)
-                                <span class="text-green-600">✅ {{ __('frontend.uploaded') ?? 'Uploaded' }}</span>
-                            @else
-                                <span class="text-gray-400">{{ __('frontend.not_available') }}</span>
-                            @endif
-                        </p>
-                    </div>
-                    @if ($customer->id_document_path)
-                        @if(\Illuminate\Support\Facades\Storage::disk('public')->exists($customer->id_document_path))
-                        <a href="{{ Storage::url($customer->id_document_path) }}" target="_blank"
-                            class="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                            {{ __('frontend.view_document') }}
-                        </a>
-                        @else
-                        <span class="text-red-500 text-sm">{{ __('frontend.file_not_found') }}</span>
-                        @endif
-                    @endif
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                    <p class="text-2xl font-bold text-green-700">{{ number_format($totalPaid, 0) }}</p>
+                    <p class="text-xs text-green-600">{{ __('frontend.dh') }} {{ __('frontend.total_paid') ?? 'Total Paid' }}</p>
                 </div>
-
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                        <p class="font-medium text-gray-800">{{ __('frontend.document_license') }}</p>
-                        <p class="text-sm text-gray-500">
-                            @if ($customer->license_document_path)
-                                <span class="text-green-600">✅ {{ __('frontend.uploaded') ?? 'Uploaded' }}</span>
-                            @else
-                                <span class="text-gray-400">{{ __('frontend.not_available') }}</span>
-                            @endif
-                        </p>
-                    </div>
-                    @if ($customer->license_document_path)
-                        @if(\Illuminate\Support\Facades\Storage::disk('public')->exists($customer->license_document_path))
-                        <a href="{{ Storage::url($customer->license_document_path) }}" target="_blank"
-                            class="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                            {{ __('frontend.view_document') }}
-                        </a>
-                        @else
-                        <span class="text-red-500 text-sm">{{ __('frontend.file_not_found') }}</span>
-                        @endif
-                    @endif
+                <div class="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-200">
+                    <p class="text-2xl font-bold text-yellow-700">{{ $pendingPaymentCount }}</p>
+                    <p class="text-xs text-yellow-600">{{ __('frontend.pending') ?? 'Pending' }}</p>
                 </div>
             </div>
+
+            @if ($recentPayments->count() > 0)
+                <div class="space-y-2">
+                    @foreach ($recentPayments as $payment)
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-amber-50 transition">
+                            <div>
+                                <p class="font-medium text-gray-800 text-sm">#{{ $payment->booking_id }}</p>
+                                <p class="text-xs text-gray-500">{{ $payment->booking?->vehicle?->brand ?? '' }} {{ $payment->booking?->vehicle?->model ?? '' }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-amber-600 text-sm">{{ number_format($payment->amount, 2) }} {{ __('frontend.dh') }}</p>
+                                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium
+                                    @switch($payment->status)
+                                        @case('completed') bg-green-100 text-green-700 @break
+                                        @case('pending') bg-yellow-100 text-yellow-700 @break
+                                        @case('partial') bg-blue-100 text-blue-700 @break
+                                        @case('refunded') bg-gray-100 text-gray-700 @break
+                                        @default bg-gray-100 text-gray-600
+                                    @endswitch">
+                                    {{ ucfirst($payment->status) }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-6 text-gray-500">
+                    <p>{{ __('frontend.no_payments_yet') ?? 'No payments yet' }}</p>
+                </div>
+            @endif
         </div>
     </div>
 </div>

@@ -16,6 +16,7 @@
                     <a href="{{ route('frontend.vehicles') }}" class="hover:text-amber-200">{{ __('frontend.cars') }}</a>
                     @auth
                         <a href="{{ route('frontend.dashboard') }}" class="hover:text-amber-200">{{ __('frontend.my_dashboard') }}</a>
+                        <a href="{{ route('frontend.payments') }}" class="hover:text-amber-200">{{ __('frontend.payments') ?? 'Payments' }}</a>
                         <form method="POST" action="{{ route('frontend.logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="hover:text-amber-200 cursor-pointer">{{ __('frontend.logout') }}</button>

@@ -248,11 +248,16 @@ class BookingController extends Controller
                 ->with('error', __('frontend.customer_profile_not_found'));
         }
 
-        $booking = Booking::with('vehicle', 'customer', 'pickupCity', 'returnCity')
+        $booking = Booking::with('vehicle', 'customer', 'pickupCity', 'returnCity', 'payments')
             ->where('customer_id', $customer->id)
             ->findOrFail($id);
 
-        return view('frontend.booking.detail', compact('booking'));
+        $payments = $booking->payments;
+        $totalPaid = $payments->where('status', 'completed')->sum('amount');
+        $totalDeposit = $payments->where('status', 'completed')->sum('deposit_amount');
+        $remainingBalance = max(0, ($booking->total_amount ?? 0) - $totalPaid);
+
+        return view('frontend.booking.detail', compact('booking', 'payments', 'totalPaid', 'totalDeposit', 'remainingBalance'));
     }
 
     public function invoice(int $id)

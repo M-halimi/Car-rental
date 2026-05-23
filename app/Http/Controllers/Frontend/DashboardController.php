@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -37,11 +38,30 @@ class DashboardController extends Controller
 
         $totalBookings = $customer->bookings()->count();
 
+        $bookingIds = $customer->bookings()->pluck('id');
+
+        $totalPaid = Payment::whereIn('booking_id', $bookingIds)
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        $pendingPaymentCount = Payment::whereIn('booking_id', $bookingIds)
+            ->whereIn('status', ['pending', 'partial', 'overdue'])
+            ->count();
+
+        $recentPayments = Payment::whereIn('booking_id', $bookingIds)
+            ->with('booking.vehicle')
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('frontend.dashboard', compact(
             'bookings',
             'activeBookings',
             'completedBookings',
             'totalBookings',
+            'totalPaid',
+            'pendingPaymentCount',
+            'recentPayments',
             'customer'
         ));
     }
