@@ -37,6 +37,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/account/payments', PaymentHistoryPage::class)->name('frontend.payments');
     Route::get('/payment/{payment}/receipt', function (Payment $payment) {
         $customer = auth()->user()?->customer;
+
         abort_if($payment->booking->customer_id !== $customer?->id, 403);
 
         $pdf = Pdf::loadView('receipts.payment', [

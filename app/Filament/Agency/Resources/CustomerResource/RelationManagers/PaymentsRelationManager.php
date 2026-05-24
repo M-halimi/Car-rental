@@ -4,13 +4,12 @@ namespace App\Filament\Agency\Resources\CustomerResource\RelationManagers;
 
 use App\Filament\Agency\Resources\PaymentResource;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
-
 
 class PaymentsRelationManager extends RelationManager
 {

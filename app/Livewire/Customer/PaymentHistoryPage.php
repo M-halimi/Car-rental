@@ -3,8 +3,10 @@
 namespace App\Livewire\Customer;
 
 use App\Models\Payment;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.frontend')]
 class PaymentHistoryPage extends Component
 {
     public function render()

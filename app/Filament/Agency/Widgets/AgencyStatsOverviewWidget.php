@@ -4,6 +4,7 @@ namespace App\Filament\Agency\Widgets;
 
 use App\Models\Booking;
 use App\Models\Vehicle;
+use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -11,7 +12,8 @@ class AgencyStatsOverviewWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $user = auth()->user();
+
+        $user = Filament::auth()->user();
         $agency = $user?->agency;
 
         if (! $agency) {

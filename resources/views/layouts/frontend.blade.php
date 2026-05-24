@@ -42,6 +42,7 @@
     </nav>
 
     @yield('content')
+    {{ $slot ?? '' }}
 
     <footer class="bg-green-700 text-white mt-16">
         <div class="container mx-auto px-4 py-8">

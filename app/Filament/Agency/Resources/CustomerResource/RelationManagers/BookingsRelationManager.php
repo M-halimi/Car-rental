@@ -4,6 +4,7 @@ namespace App\Filament\Agency\Resources\CustomerResource\RelationManagers;
 
 use App\Models\Booking;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -20,7 +21,8 @@ class BookingsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
+        $user = Filament::auth()->user();
+
         $agencyId = $user?->agency?->id;
 
         return $table

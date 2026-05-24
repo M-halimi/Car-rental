@@ -2,11 +2,14 @@
 
 namespace App\Filament\Agency\Resources;
 
+namespace App\Filament\Agency\Resources;
+
 use App\Filament\Agency\Resources\PaymentResource\Pages;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Services\PaymentService;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -15,15 +18,14 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\auth\Facades\Filament;
 use Filament\Schemas\Schema;
-
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 
 class PaymentResource extends Resource
@@ -50,7 +52,7 @@ class PaymentResource extends Resource
                                 ->getOptionLabelFromRecordUsing(fn ($record) => "Booking #{$record->id} - {$record?->customer?->user?->name}")
                                 ->required()
                                 ->live()
-                                ->afterStateUpdated(fn (callable  $set, ?string $state) => $state ? $set('amount', Booking::find($state)?->total_price ?? 0) : null),
+                                ->afterStateUpdated(fn (callable $set, ?string $state) => $state ? $set('amount', Booking::find($state)?->total_price ?? 0) : null),
                             TextInput::make('amount')
                                 ->label('Amount')
                                 ->numeric()
@@ -216,8 +218,14 @@ class PaymentResource extends Resource
                     ->label('Receipt PDF')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('info')
-                    ->action(fn (Payment $record) => app(PaymentService::class)->generateReceipt($record))
-                    ->visible(fn (Payment $record) => $record->status === Payment::PAID),
+                    ->action(function (Payment $record) {
+                        $path = app(PaymentService::class)->generateReceipt($record);
+
+                        // dd(storage_path("app/public/{$path}"));
+                        return Storage::disk('public')->download("receipts/receipt-2-7.pdf");
+                       
+                    })
+                    ->visible(fn (Payment $record) => in_array($record->status, [Payment::PAID, Payment::REFUNDED, Payment::PARTIAL])),
             ]);
     }
 

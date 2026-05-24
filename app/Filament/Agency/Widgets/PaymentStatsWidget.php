@@ -4,6 +4,7 @@ namespace App\Filament\Agency\Widgets;
 
 use App\Models\Payment;
 use App\Models\Vehicle;
+use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Number;
@@ -12,7 +13,8 @@ class PaymentStatsWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $user = auth()->user();
+        $user = Filament::auth()->user();
+
         $agency = $user?->agency;
 
         if (! $agency) {
@@ -38,13 +40,20 @@ class PaymentStatsWidget extends BaseWidget
             ->sum('amount');
 
         $refundedThisMonth = (clone $query)
-            ->where('status', Payment::REFUNDED)
+            ->where('refunded_amount', '>', 0)
             ->whereMonth('updated_at', now()->month)
             ->whereYear('updated_at', now()->year)
             ->sum('refunded_amount');
 
         $overdueCount = (clone $query)
-            ->where('status', Payment::OVERDUE)
+            ->where(function ($q) {
+                $q->where('status', Payment::OVERDUE)
+                    ->orWhere(function ($q) {
+                        $q->whereIn('status', [Payment::PENDING, Payment::PARTIAL])
+                            ->whereNotNull('due_date')
+                            ->where('due_date', '<', now());
+                    });
+            })
             ->count();
 
         return [

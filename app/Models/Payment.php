@@ -88,6 +88,6 @@ class Payment extends Model
 
     public function getRemainingBalance(): float
     {
-        return (float) ($this->remaining_balance ?? $this->amount - ($this->deposit_amount ?? 0) - ($this->refunded_amount ?? 0));
+        return (float) ($this->amount - ($this->deposit_amount ?? 0) - ($this->refunded_amount ?? 0));
     }
 }
