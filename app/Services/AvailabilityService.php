@@ -8,12 +8,18 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AvailabilityService
 {
-    private const array ACTIVE_STATUSES = ['pending', 'confirmed', 'active'];
+    public function getBookedCount(
+        int $vehicleId,
+        string $pickupDate,
+        string $returnDate,
+        ?int $excludeBookingId = null,
+        bool $lockForUpdate = false,
+        ?array $statuses = null,
+    ): int {
+        $statuses ??= Booking::STOCK_HOLD_STATUSES;
 
-    public function getBookedCount(int $vehicleId, string $pickupDate, string $returnDate): int
-    {
-        return Booking::where('vehicle_id', $vehicleId)
-            ->whereIn('status', self::ACTIVE_STATUSES)
+        $query = Booking::where('vehicle_id', $vehicleId)
+            ->whereIn('status', $statuses)
             ->where(function ($query) use ($pickupDate, $returnDate) {
                 $query->whereBetween('pickup_date', [$pickupDate, $returnDate])
                     ->orWhereBetween('return_date', [$pickupDate, $returnDate])
@@ -21,26 +27,52 @@ class AvailabilityService
                         $q->where('pickup_date', '<=', $pickupDate)
                             ->where('return_date', '>=', $returnDate);
                     });
-            })
-            ->count();
+            });
+
+        if ($excludeBookingId) {
+            $query->where('id', '!=', $excludeBookingId);
+        }
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->count();
     }
 
-    public function getAvailableStock(int $vehicleId, string $pickupDate, string $returnDate): int
-    {
+    public function getAvailableStock(
+        int $vehicleId,
+        string $pickupDate,
+        string $returnDate,
+        ?int $excludeBookingId = null,
+        bool $lockForUpdate = false,
+        ?array $statuses = null,
+    ): int {
         $vehicle = Vehicle::find($vehicleId);
 
         if (! $vehicle || ! $vehicle->is_active || in_array($vehicle->status, ['unavailable', 'maintenance'], true)) {
             return 0;
         }
 
-        $booked = $this->getBookedCount($vehicleId, $pickupDate, $returnDate);
+        $booked = $this->getBookedCount(
+            $vehicleId,
+            $pickupDate,
+            $returnDate,
+            excludeBookingId: $excludeBookingId,
+            lockForUpdate: $lockForUpdate,
+            statuses: $statuses,
+        );
 
         return max(0, ($vehicle->quantity ?? 1) - $booked);
     }
 
-    public function getAvailabilityStatus(int $vehicleId, string $pickupDate, string $returnDate): string
-    {
-        $stock = $this->getAvailableStock($vehicleId, $pickupDate, $returnDate);
+    public function getAvailabilityStatus(
+        int $vehicleId,
+        string $pickupDate,
+        string $returnDate,
+        ?int $excludeBookingId = null,
+    ): string {
+        $stock = $this->getAvailableStock($vehicleId, $pickupDate, $returnDate, $excludeBookingId);
 
         if ($stock <= 0) {
             return 'booked';
@@ -59,7 +91,7 @@ class AvailabilityService
     public function attachStockData(Collection $vehicles, string $pickupDate, string $returnDate): Collection
     {
         $bookedCounts = Booking::whereIn('vehicle_id', $vehicles->pluck('id'))
-            ->whereIn('status', self::ACTIVE_STATUSES)
+            ->whereIn('status', Booking::STOCK_HOLD_STATUSES)
             ->where(function ($q) use ($pickupDate, $returnDate) {
                 $q->whereBetween('pickup_date', [$pickupDate, $returnDate])
                     ->orWhereBetween('return_date', [$pickupDate, $returnDate])
@@ -73,6 +105,12 @@ class AvailabilityService
             ->pluck('booked_count', 'vehicle_id');
 
         foreach ($vehicles as $vehicle) {
+            if (! $vehicle->is_active || in_array($vehicle->status, ['unavailable', 'maintenance'], true)) {
+                $vehicle->available_stock = 0;
+
+                continue;
+            }
+
             $booked = (int) ($bookedCounts[$vehicle->id] ?? 0);
             $total = $vehicle->quantity ?? 1;
             $vehicle->available_stock = max(0, $total - $booked);
@@ -83,7 +121,7 @@ class AvailabilityService
 
     public function getUnavailableVehicleIds(string $pickupDate, string $returnDate): array
     {
-        $bookedCounts = Booking::whereIn('status', self::ACTIVE_STATUSES)
+        $bookedCounts = Booking::whereIn('status', Booking::STOCK_HOLD_STATUSES)
             ->where(function ($q) use ($pickupDate, $returnDate) {
                 $q->whereBetween('pickup_date', [$pickupDate, $returnDate])
                     ->orWhereBetween('return_date', [$pickupDate, $returnDate])

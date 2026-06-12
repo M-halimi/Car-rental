@@ -139,4 +139,4 @@
         </main>
     </div>
 </div>
-@endSection
+@endsection

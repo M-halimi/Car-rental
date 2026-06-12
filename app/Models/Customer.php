@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -37,6 +38,8 @@ class Customer extends Model
         return [
             'birth_date' => 'date',
             'license_expiry' => 'date',
+            'is_verified' => 'boolean',
+            'is_blocked' => 'boolean',
         ];
     }
 
@@ -53,6 +56,11 @@ class Customer extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(VehicleReview::class);
     }
 
     public function payments(): HasManyThrough

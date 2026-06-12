@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\City;
 use App\Models\Vehicle;
 use App\Services\AvailabilityService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,7 +32,7 @@ class BookingController extends Controller
         $days = (strtotime($returnDate) - strtotime($pickupDate)) / (60 * 60 * 24);
         $total = $vehicle->daily_rate * max(1, $days);
 
-        $request->session()->forget('booking_data');
+        $request->session()->forget(['booking_data', 'booking_completed', 'booking_token']);
         $request->session()->put('booking_step', 1);
 
         return view('frontend.booking.step1', compact('vehicle', 'cities', 'pickupDate', 'returnDate', 'total', 'days', 'availability'));
@@ -168,75 +170,7 @@ class BookingController extends Controller
 
         $request->session()->put('booking_step', 4);
 
-        $vehicle = Vehicle::findOrFail($bookingData['vehicle_id']);
-        $cities = City::all();
-
-        return view('frontend.booking.step4', compact('vehicle', 'bookingData', 'cities'));
-    }
-
-    public function store(Request $request, AvailabilityService $availabilityService)
-    {
-        if ($request->session()->get('booking_step') < 4) {
-            return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
-        }
-
-        $bookingData = $request->session()->get('booking_data');
-
-        if (! $bookingData || ! isset($bookingData['vehicle_id'])) {
-            return redirect()->route('frontend.home')->with('error', __('frontend.booking_session_expired'));
-        }
-
-        $stock = $availabilityService->getAvailableStock(
-            $bookingData['vehicle_id'],
-            $bookingData['pickup_date'],
-            $bookingData['return_date']
-        );
-
-        if ($stock <= 0) {
-            return redirect()->back()->withErrors(['vehicle' => __('frontend.vehicle_unavailable')]);
-        }
-
-        $customer = Auth::user()->customer;
-
-        if (! $customer) {
-            return redirect()->route('frontend.home')->with('error', __('frontend.customer_profile_not_found'));
-        }
-
-        if (isset($bookingData['id_document_path']) || isset($bookingData['license_document_path'])) {
-            $customer->update([
-                'id_document_path' => $bookingData['id_document_path'] ?? $customer->id_document_path,
-                'license_document_path' => $bookingData['license_document_path'] ?? $customer->license_document_path,
-            ]);
-        }
-
-        try {
-            $booking = Booking::create([
-                'vehicle_id' => $bookingData['vehicle_id'],
-                'customer_id' => $customer->id,
-                'pickup_city_id' => $bookingData['pickup_city_id'],
-                'return_city_id' => $bookingData['return_city_id'],
-                'pickup_date' => $bookingData['pickup_date'],
-                'return_date' => $bookingData['return_date'],
-                'price_per_day' => $bookingData['daily_rate'],
-                'daily_rate' => $bookingData['daily_rate'],
-                'total_days' => $bookingData['total_days'],
-                'subtotal' => $bookingData['subtotal'],
-                'extras_price' => $bookingData['extras_total'] ?? 0,
-                'total_price' => $bookingData['total'],
-                'total_amount' => $bookingData['total'],
-                'discount' => 0,
-                'status' => 'pending',
-                'notes' => $request->notes,
-            ]);
-        } catch (\RuntimeException $e) {
-            return redirect()->back()->withErrors(['vehicle' => $e->getMessage()]);
-        }
-
-        $request->session()->forget('booking_data');
-
-        $booking = Booking::with('vehicle')->find($booking->id);
-
-        return view('frontend.booking.confirmation', compact('booking'));
+        return redirect()->route('frontend.booking.confirm');
     }
 
     public function detail(int $id)
@@ -274,5 +208,33 @@ class BookingController extends Controller
             ->findOrFail($id);
 
         return view('frontend.booking.invoice', compact('booking'));
+    }
+
+    public function cancel(int $id): RedirectResponse
+    {
+        $customer = Auth::user()?->customer;
+
+        if (! $customer) {
+            return redirect()->route('frontend.home')
+                ->with('error', __('frontend.customer_profile_not_found'));
+        }
+
+        $booking = Booking::where('customer_id', $customer->id)
+            ->findOrFail($id);
+
+        if (in_array($booking->status, Booking::STOCK_RELEASE_STATUSES, true)) {
+            return redirect()->route('frontend.booking.detail', $booking->id)
+                ->with('error', __('frontend.booking_already_cancelled'));
+        }
+
+        if (! in_array($booking->status, Booking::ACTIVE_STATUSES, true)) {
+            return redirect()->route('frontend.booking.detail', $booking->id)
+                ->with('error', __('frontend.booking_cannot_cancel'));
+        }
+
+        $booking->transitionTo(BookingStatus::Cancelled->value);
+
+        return redirect()->route('frontend.booking.detail', $booking->id)
+            ->with('success', __('frontend.booking_cancelled_success'));
     }
 }

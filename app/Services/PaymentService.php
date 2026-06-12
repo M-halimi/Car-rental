@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\PaymentReceived;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\PaymentLog;
@@ -13,11 +14,15 @@ class PaymentService
     public function recordPayment(Booking $booking, array $data): Payment
     {
         $data['booking_id'] = $booking->id;
-        $data['remaining_balance'] = $data['amount'] - ($data['deposit_amount'] ?? 0);
 
+        /** @var Payment $payment */
         $payment = Payment::create($data);
 
         $this->logAction($payment, 'created', $payment->amount, $data['notes'] ?? null);
+
+        if ($payment->status === Payment::PAID) {
+            PaymentReceived::dispatch($booking, $payment);
+        }
 
         return $payment;
     }
@@ -31,13 +36,14 @@ class PaymentService
         ]);
 
         $this->logAction($payment, 'deposited', $amount, "Deposit of $amount MAD processed");
+
+        PaymentReceived::dispatch($payment->booking, $payment);
     }
 
     public function processRefund(Payment $payment, float $amount, string $reason): void
     {
         $payment->update([
             'refunded_amount' => ($payment->refunded_amount ?? 0) + $amount,
-            'remaining_balance' => $payment->getRemainingBalance(),
             'status' => $payment->getRemainingBalance() <= 0 ? Payment::REFUNDED : Payment::PARTIAL,
         ]);
 

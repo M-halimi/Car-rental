@@ -15,6 +15,11 @@
         .total-row td { border-top: 2px solid #d97706; font-weight: bold; font-size: 14px; padding-top: 10px; }
         .status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .status.completed { background: #d1fae5; color: #065f46; }
+        .status.partial { background: #fef3c7; color: #92400e; }
+        .status.pending { background: #f3f4f6; color: #374151; }
+        .status.refunded { background: #dbeafe; color: #1e40af; }
+        .status.failed { background: #fee2e2; color: #991b1b; }
+        .status.overdue { background: #fee2e2; color: #991b1b; }
         .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 10px; }
     </style>
 </head>

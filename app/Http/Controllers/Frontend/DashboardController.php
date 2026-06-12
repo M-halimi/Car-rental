@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Auth;
@@ -29,11 +30,11 @@ class DashboardController extends Controller
             ->paginate(10);
 
         $activeBookings = $customer->bookings()
-            ->whereIn('status', ['pending', 'confirmed', 'active'])
+            ->whereIn('status', array_map(fn (BookingStatus $s) => $s->value, BookingStatus::activeStatuses()))
             ->count();
 
         $completedBookings = $customer->bookings()
-            ->where('status', 'completed')
+            ->where('status', BookingStatus::Completed->value)
             ->count();
 
         $totalBookings = $customer->bookings()->count();

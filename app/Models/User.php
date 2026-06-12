@@ -38,6 +38,19 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    public function routeNotificationForSms(): ?string
+    {
+        if ($this->hasRole('customer') && $this->relationLoaded('customer') && $this->customer) {
+            return $this->customer->phone;
+        }
+
+        if ($this->relationLoaded('agency') && $this->agency) {
+            return $this->agency->phone;
+        }
+
+        return null;
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         if ($this->hasRole('super_admin')) {
@@ -46,7 +59,7 @@ class User extends Authenticatable implements FilamentUser
 
         return match ($panel->getId()) {
             'agency' => $this->hasRole('agency'),
-            'admin' => $this->hasRole('admin'),
+            'admin' => $this->hasRole('super_admin'),
             default => false,
         };
     }

@@ -39,7 +39,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-gray-500">{{ $payment->paid_at?->format('M d, Y') ?? $payment->created_at->format('M d, Y') }}</td>
                                 <td class="px-6 py-4">
-                                    @if($payment->status === 'completed')
+                                    @if(in_array($payment->status, ['completed', 'refunded', 'partial']))
                                         <a href="{{ route('frontend.payment.receipt', $payment->id) }}" class="text-amber-600 hover:text-amber-800 text-sm font-medium">Download</a>
                                     @else
                                         <span class="text-gray-400 text-sm">-</span>
@@ -49,6 +49,10 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-6">
+                {{ $payments->links() }}
             </div>
         @endif
     </div>

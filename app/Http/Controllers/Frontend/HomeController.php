@@ -73,9 +73,9 @@ class HomeController extends Controller
                 $request->return_date
             );
         } else {
-            foreach ($vehicles as $vehicle) {
-                $vehicle->available_stock = $vehicle->quantity ?? 1;
-            }
+            $today = now()->format('Y-m-d');
+            $tomorrow = now()->addDay()->format('Y-m-d');
+            $vehicles = $availabilityService->attachStockData($vehicles, $today, $tomorrow);
         }
 
         $brands = Vehicle::distinct()->pluck('brand')->sort();

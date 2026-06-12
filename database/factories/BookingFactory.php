@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\City;
 use App\Models\Customer;
@@ -27,7 +28,7 @@ class BookingFactory extends Factory
             'total_price' => 1500,
             'total_amount' => 1500,
             'deposit_amount' => 500,
-            'status' => 'confirmed',
+            'status' => BookingStatus::Confirmed->value,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Agency\Widgets;
 
+use App\Enums\BookingStatus;
 use App\Filament\Agency\Resources\BookingResource;
 use App\Models\Booking;
 use Filament\Actions\Action;
@@ -44,14 +45,7 @@ class RecentBookingsWidget extends BaseWidget
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'confirmed' => 'info',
-                        'active' => 'success',
-                        'completed' => 'gray',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => BookingStatus::tryFrom($state)?->color() ?? 'gray'),
             ])
             ->actions([
                 Action::make('view')

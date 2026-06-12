@@ -156,6 +156,14 @@
                         class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg text-center hover:bg-gray-400 font-bold">
                         ← {{ __('frontend.my_dashboard') }}
                     </a>
+                    @if(!in_array($booking->status, ['cancelled', 'completed', 'failed', 'expired']))
+                        <form action="{{ route('frontend.booking.cancel', $booking->id) }}" method="POST" class="flex-1" onsubmit="return confirm('{{ __('frontend.booking_cancel_confirm') }}')">
+                            @csrf
+                            <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg text-center hover:bg-red-700 font-bold cursor-pointer">
+                                {{ __('frontend.booking_cancel') }}
+                            </button>
+                        </form>
+                    @endif
                     <a href="{{ route('frontend.booking.invoice', $booking->id) }}"
                         class="flex-1 bg-amber-600 text-white py-3 rounded-lg text-center hover:bg-amber-700 font-bold">
                         📄 {{ __('frontend.download_invoice') }}

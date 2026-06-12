@@ -5,14 +5,13 @@ namespace App\Filament\Agency\Resources;
 use App\Filament\Agency\Resources\VehicleResource\Pages;
 use App\Filament\Agency\Resources\VehicleResource\RelationManagers;
 use App\Models\Vehicle;
+use App\Services\AvailabilityService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -24,7 +23,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class VehicleResource extends Resource
+class VehicleResource extends AgencyPanelResource
 {
     protected static ?string $model = Vehicle::class;
 
@@ -187,6 +186,20 @@ class VehicleResource extends Resource
                         ($record->quantity ?? 1) > 1 => 'warning',
                         default => 'gray',
                     }),
+                TextColumn::make('available_today')
+                    ->label('Available Now')
+                    ->state(fn (Vehicle $record): int => app(AvailabilityService::class)->getAvailableStock(
+                        $record->id,
+                        now()->format('Y-m-d'),
+                        now()->addDay()->format('Y-m-d'),
+                    ))
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state > 5 => 'success',
+                        $state > 1 => 'warning',
+                        $state > 0 => 'danger',
+                        default => 'gray',
+                    }),
                 TextColumn::make('price_per_day')
                     ->label('Price/Day')
                     ->money('MAD'),
@@ -233,15 +246,8 @@ class VehicleResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
+    protected static function applyAgencyScope(Builder $query, int $agencyId): Builder
     {
-        $user = Filament::auth()->user();
-
-        if (! $user || ! $user->agency) {
-            return parent::getEloquentQuery()->whereRaw('1 = 0');
-        }
-
-        return parent::getEloquentQuery()
-            ->where('agency_id', $user->agency->id);
+        return $query->where('agency_id', $agencyId);
     }
 }

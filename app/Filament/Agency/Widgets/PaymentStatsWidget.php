@@ -4,6 +4,7 @@ namespace App\Filament\Agency\Widgets;
 
 use App\Models\Payment;
 use App\Models\Vehicle;
+use App\Services\AgencyRevenueService;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -14,7 +15,6 @@ class PaymentStatsWidget extends BaseWidget
     protected function getStats(): array
     {
         $user = Filament::auth()->user();
-
         $agency = $user?->agency;
 
         if (! $agency) {
@@ -56,10 +56,15 @@ class PaymentStatsWidget extends BaseWidget
             })
             ->count();
 
+        $monthlyBreakdown = app(AgencyRevenueService::class)->getRevenueBreakdown($agency, 'month');
+
         return [
             Stat::make('Revenue (This Month)', Number::currency($currentMonthRevenue, 'MAD'))
                 ->description('Total completed payments')
                 ->icon('heroicon-o-currency-dollar'),
+            Stat::make('Net Earnings (This Month)', Number::currency($monthlyBreakdown['net'], 'MAD'))
+                ->description(Number::currency($monthlyBreakdown['commission'], 'MAD').' commission')
+                ->icon('heroicon-o-banknotes'),
             Stat::make('Pending Payments', $pendingCount)
                 ->description(Number::currency($pendingAmount, 'MAD').' total pending')
                 ->icon('heroicon-o-clock'),

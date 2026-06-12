@@ -192,4 +192,4 @@
     });
 </script>
 @endpush
-@endSection
+@endsection

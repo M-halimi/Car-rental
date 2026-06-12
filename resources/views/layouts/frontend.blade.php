@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'CarRental.ma')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 <body class="bg-gray-50">
     <nav class="bg-amber-600 text-white shadow-lg">
@@ -53,11 +54,14 @@
                 </div>
                 <div>
                     <h4 class="text-lg font-semibold mb-4">{{ __('frontend.popular_cities') }}</h4>
+                    @php
+                        $popularCities = \App\Models\City::whereIn('id', [1, 2, 3, 4])->pluck('name', 'id');
+                    @endphp
                     <ul class="space-y-2">
-                        <li>{{ App\Models\City::find(1)?->name ?? 'Casablanca' }}</li>
-                        <li>{{ App\Models\City::find(2)?->name ?? 'Marrakech' }}</li>
-                        <li>{{ App\Models\City::find(3)?->name ?? 'Tangier' }}</li>
-                        <li>{{ App\Models\City::find(4)?->name ?? 'Agadir' }}</li>
+                        <li>{{ $popularCities[1] ?? 'Casablanca' }}</li>
+                        <li>{{ $popularCities[2] ?? 'Marrakech' }}</li>
+                        <li>{{ $popularCities[3] ?? 'Tangier' }}</li>
+                        <li>{{ $popularCities[4] ?? 'Agadir' }}</li>
                     </ul>
                 </div>
                 <div>
@@ -71,5 +75,7 @@
             </div>
         </div>
     </footer>
+
+    @livewireScripts
 </body>
 </html>

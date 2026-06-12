@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     const PAID = 'completed';
 
@@ -25,11 +26,19 @@ class Payment extends Model
 
     const OVERDUE = 'overdue';
 
+    const STATUS_FLOW = [
+        'pending' => ['partial', 'completed', 'failed', 'overdue'],
+        'partial' => ['completed', 'failed', 'overdue'],
+        'completed' => ['refunded'],
+        'failed' => ['pending'],
+        'overdue' => ['completed', 'failed'],
+        'refunded' => [],
+    ];
+
     protected $fillable = [
         'booking_id',
         'amount',
         'deposit_amount',
-        'remaining_balance',
         'refunded_amount',
         'payment_type',
         'payment_method',
@@ -48,7 +57,6 @@ class Payment extends Model
             'due_date' => 'datetime',
             'amount' => 'decimal:2',
             'deposit_amount' => 'decimal:2',
-            'remaining_balance' => 'decimal:2',
             'refunded_amount' => 'decimal:2',
         ];
     }
@@ -88,6 +96,14 @@ class Payment extends Model
 
     public function getRemainingBalance(): float
     {
-        return (float) ($this->amount - ($this->deposit_amount ?? 0) - ($this->refunded_amount ?? 0));
+        return round(
+            ($this->amount ?? 0) - ($this->deposit_amount ?? 0) - ($this->refunded_amount ?? 0),
+            2
+        );
+    }
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return in_array($newStatus, self::STATUS_FLOW[$this->status] ?? []);
     }
 }

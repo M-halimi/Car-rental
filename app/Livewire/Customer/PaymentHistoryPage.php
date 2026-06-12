@@ -5,10 +5,13 @@ namespace App\Livewire\Customer;
 use App\Models\Payment;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.frontend')]
 class PaymentHistoryPage extends Component
 {
+    use WithPagination;
+
     public function render()
     {
         $customer = auth()->user()?->customer;
@@ -17,7 +20,7 @@ class PaymentHistoryPage extends Component
             ? Payment::whereHas('booking', fn ($q) => $q->where('customer_id', $customer->id))
                 ->with(['booking.vehicle'])
                 ->latest()
-                ->get()
+                ->paginate(15)
             : collect();
 
         return view('livewire.customer.payment-history-page', [

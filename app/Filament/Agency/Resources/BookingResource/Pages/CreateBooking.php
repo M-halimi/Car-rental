@@ -21,10 +21,14 @@ class CreateBooking extends CreateRecord
         $vehicleId = $data['vehicle_id'] ?? null;
 
         if ($pickupDate && $returnDate && $vehicleId) {
+            $pickup = $pickupDate instanceof Carbon ? $pickupDate->format('Y-m-d') : $pickupDate;
+            $return = $returnDate instanceof Carbon ? $returnDate->format('Y-m-d') : $returnDate;
+
             $stock = $service->getAvailableStock(
                 $vehicleId,
-                $pickupDate instanceof Carbon ? $pickupDate->format('Y-m-d') : $pickupDate,
-                $returnDate instanceof Carbon ? $returnDate->format('Y-m-d') : $returnDate,
+                $pickup,
+                $return,
+                lockForUpdate: true,
             );
 
             if ($stock <= 0) {

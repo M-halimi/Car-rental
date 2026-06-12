@@ -81,6 +81,14 @@
                                     <a href="{{ route('frontend.booking.detail', $booking->id) }}" class="text-amber-600 hover:text-amber-700 text-sm font-medium">
                                         {{ __('frontend.view_details') }}
                                     </a>
+                                    @if(!in_array($booking->status, ['cancelled', 'completed', 'failed', 'expired']))
+                                        <form action="{{ route('frontend.booking.cancel', $booking->id) }}" method="POST" class="inline ml-2" onsubmit="return confirm('{{ __('frontend.booking_cancel_confirm') }}')">
+                                            @csrf
+                                            <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium">
+                                                {{ __('frontend.booking_cancel') }}
+                                            </button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

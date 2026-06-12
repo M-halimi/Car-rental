@@ -8,12 +8,10 @@ use App\Models\Customer;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -23,7 +21,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class CustomerResource extends Resource
+class CustomerResource extends AgencyPanelResource
 {
     protected static ?string $model = Customer::class;
 
@@ -178,18 +176,11 @@ class CustomerResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
+    protected static function applyAgencyScope(Builder $query, int $agencyId): Builder
     {
-        $user = Filament::auth()->user();
-
-        if (! $user || ! $user->agency) {
-            return parent::getEloquentQuery()->whereRaw('1 = 0');
-        }
-
-        return parent::getEloquentQuery()
-            ->where(function ($query) use ($user) {
-                $query->whereHas('bookings.vehicle', fn ($q) => $q->where('agency_id', $user->agency->id))
-                    ->orWhereDoesntHave('bookings');
-            });
+        return $query->where(function ($q) use ($agencyId) {
+            $q->whereHas('bookings.vehicle', fn ($sq) => $sq->where('agency_id', $agencyId))
+                ->orWhereDoesntHave('bookings');
+        });
     }
 }

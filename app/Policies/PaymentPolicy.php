@@ -9,7 +9,7 @@ class PaymentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('agency');
+        return $user->hasRole('agency') || $user->hasRole('super_admin');
     }
 
     public function view(User $user, Payment $payment): bool

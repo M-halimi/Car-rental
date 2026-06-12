@@ -2,18 +2,17 @@
 
 namespace App\Filament\Agency\Resources;
 
+use App\Enums\BookingStatus;
 use App\Filament\Agency\Resources\BookingResource\Pages;
 use App\Models\Booking;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -23,7 +22,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class BookingResource extends Resource
+class BookingResource extends AgencyPanelResource
 {
     protected static ?string $model = Booking::class;
 
@@ -114,14 +113,7 @@ class BookingResource extends Resource
                                 ->default('pending'),
                             Select::make('status')
                                 ->label('Status')
-                                ->options([
-                                    'pending' => 'Pending',
-                                    'confirmed' => 'Confirmed',
-                                    'active' => 'Active',
-                                    'completed' => 'Completed',
-                                    'cancelled' => 'Cancelled',
-                                    'refunded' => 'Refunded',
-                                ])
+                                ->options(BookingStatus::labels())
                                 ->required(),
                         ]),
                         Textarea::make('notes')
@@ -165,15 +157,7 @@ class BookingResource extends Resource
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'confirmed' => 'info',
-                        'active' => 'success',
-                        'completed' => 'gray',
-                        'cancelled' => 'danger',
-                        'refunded' => 'gray',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => BookingStatus::tryFrom($state)?->color() ?? 'gray'),
                 TextColumn::make('deposit_status')
                     ->label('Deposit')
                     ->badge()
@@ -188,14 +172,7 @@ class BookingResource extends Resource
             ->filters([
                 SelectFilter::make('status')
                     ->label('Status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'confirmed' => 'Confirmed',
-                        'active' => 'Active',
-                        'completed' => 'Completed',
-                        'cancelled' => 'Cancelled',
-                        'refunded' => 'Refunded',
-                    ]),
+                    ->options(BookingStatus::labels()),
             ])
             ->actions([
                 EditAction::make(),
@@ -217,15 +194,8 @@ class BookingResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
+    protected static function applyAgencyScope(Builder $query, int $agencyId): Builder
     {
-        $user = Filament::auth()->user();
-
-        if (! $user || ! $user->agency) {
-            return parent::getEloquentQuery()->whereRaw('1 = 0');
-        }
-
-        return parent::getEloquentQuery()
-            ->whereHas('vehicle', fn ($query) => $query->where('agency_id', $user->agency->id));
+        return $query->whereHas('vehicle', fn ($q) => $q->where('agency_id', $agencyId));
     }
 }

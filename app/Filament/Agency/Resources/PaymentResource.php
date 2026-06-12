@@ -2,20 +2,16 @@
 
 namespace App\Filament\Agency\Resources;
 
-namespace App\Filament\Agency\Resources;
-
 use App\Filament\Agency\Resources\PaymentResource\Pages;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Services\PaymentService;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -28,7 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 
-class PaymentResource extends Resource
+class PaymentResource extends AgencyPanelResource
 {
     protected static ?string $model = Payment::class;
 
@@ -221,9 +217,7 @@ class PaymentResource extends Resource
                     ->action(function (Payment $record) {
                         $path = app(PaymentService::class)->generateReceipt($record);
 
-                        // dd(storage_path("app/public/{$path}"));
-                        return Storage::disk('public')->download("receipts/receipt-2-7.pdf");
-                       
+                        return Storage::disk('public')->download($path);
                     })
                     ->visible(fn (Payment $record) => in_array($record->status, [Payment::PAID, Payment::REFUNDED, Payment::PARTIAL])),
             ]);
@@ -238,15 +232,8 @@ class PaymentResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
+    protected static function applyAgencyScope(Builder $query, int $agencyId): Builder
     {
-        $user = Filament::auth()->user();
-
-        if (! $user || ! $user->agency) {
-            return parent::getEloquentQuery()->whereRaw('1 = 0');
-        }
-
-        return parent::getEloquentQuery()
-            ->whereHas('booking.vehicle', fn ($query) => $query->where('agency_id', $user->agency->id));
+        return $query->whereHas('booking.vehicle', fn ($q) => $q->where('agency_id', $agencyId));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Agency\Resources\CustomerResource\RelationManagers;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
@@ -44,14 +45,7 @@ class BookingsRelationManager extends RelationManager
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'confirmed' => 'info',
-                        'active' => 'success',
-                        'completed' => 'gray',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => BookingStatus::tryFrom($state)?->color() ?? 'gray'),
             ])
             ->modifyQueryUsing(fn ($query) => $query
                 ->whereHas('vehicle', fn ($q) => $q->where('agency_id', $agencyId))
