@@ -10,7 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PaymentReceivedNotification extends Notification implements ShouldQueue
+class PaymentPendingNotification extends Notification implements ShouldQueue
 {
     use HasNotificationPreferences, Queueable;
 
@@ -29,25 +29,29 @@ class PaymentReceivedNotification extends Notification implements ShouldQueue
         $isCustomer = $notifiable->hasRole('customer');
 
         return (new MailMessage)
-            ->subject('Payment Received - CarRental.ma')
+            ->subject('Payment Pending - CarRental.ma')
             ->greeting("Dear {$notifiable->name},")
             ->line($isCustomer
-                ? 'Payment of '.number_format($this->payment->amount, 2)." MAD for booking #{$this->booking->id} has been received."
-                : "Payment received for booking #{$this->booking->id}."
+                ? 'A payment of '.number_format($this->payment->amount, 2)." MAD for booking #{$this->booking->id} is pending."
+                : "A payment for booking #{$this->booking->id} is pending."
             )
             ->line('Amount: '.number_format($this->payment->amount, 2).' MAD')
             ->line('Method: '.ucfirst($this->payment->payment_method))
-            ->line("Booking: #{$this->booking->id} - {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model}");
+            ->line("Booking: #{$this->booking->id} - {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model}")
+            ->line($isCustomer
+                ? 'Please complete your payment to confirm the booking.'
+                : 'Please follow up with the customer to complete the payment.'
+            );
     }
 
     public function toDatabase(object $notifiable): array
     {
         return [
-            'type' => 'payment_received',
-            'title' => "Payment Received - Booking #{$this->booking->id}",
-            'body' => 'Payment of '.number_format($this->payment->amount, 2).' MAD received via '.ucfirst($this->payment->payment_method).'.',
-            'icon' => 'heroicon-o-currency-dollar',
-            'color' => 'success',
+            'type' => 'payment_pending',
+            'title' => "Payment Pending - Booking #{$this->booking->id}",
+            'body' => 'Payment of '.number_format($this->payment->amount, 2).' MAD via '.ucfirst($this->payment->payment_method).' is pending.',
+            'icon' => 'heroicon-o-clock',
+            'color' => 'warning',
             'action_url' => "/agency/bookings/{$this->booking->id}/edit",
             'action_text' => 'View Booking',
             'model_type' => 'payment',

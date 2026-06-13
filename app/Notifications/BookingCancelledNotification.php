@@ -2,19 +2,24 @@
 
 namespace App\Notifications;
 
-use App\Notifications\Channels\SmsChannel;
+use App\Models\Booking;
+use App\Notifications\Concerns\HasNotificationPreferences;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class BookingCancelledNotification extends Notification
+class BookingCancelledNotification extends Notification implements ShouldQueue
 {
+    use HasNotificationPreferences, Queueable;
+
     public function __construct(
-        public $booking,
+        public Booking $booking,
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', SmsChannel::class];
+        return $this->resolveViaChannels($notifiable, ['mail', 'database']);
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -32,12 +37,27 @@ class BookingCancelledNotification extends Notification
             ->lineIf($this->booking->cancellation_reason, 'Reason: '.$this->booking->cancellation_reason);
     }
 
-    public function toSms(object $notifiable): string
+    public function toDatabase(object $notifiable): array
     {
         $isCustomer = $notifiable->hasRole('customer');
 
-        return $isCustomer
-            ? "CarRental.ma: Booking #{$this->booking->id} cancelled. {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model}."
-            : "CarRental.ma: Booking #{$this->booking->id} cancelled by customer. {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model}.";
+        return [
+            'type' => 'booking_cancelled',
+            'title' => $isCustomer
+                ? "Booking #{$this->booking->id} Cancelled"
+                : "Booking #{$this->booking->id} Cancelled",
+            'body' => $isCustomer
+                ? "Your booking for {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model} has been cancelled."
+                : "Booking #{$this->booking->id} for {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model} has been cancelled."
+                .($this->booking->cancellation_reason ? " Reason: {$this->booking->cancellation_reason}" : ''),
+            'icon' => 'heroicon-o-x-circle',
+            'color' => 'danger',
+            'action_url' => $isCustomer
+                ? "/bookings/{$this->booking->id}"
+                : "/agency/bookings/{$this->booking->id}/edit",
+            'action_text' => 'View Booking',
+            'model_type' => 'booking',
+            'model_id' => $this->booking->id,
+        ];
     }
 }

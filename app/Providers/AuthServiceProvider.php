@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Vehicle;
+use App\Policies\AgencyPolicy;
 use App\Policies\BookingPolicy;
 use App\Policies\CustomerPolicy;
 use App\Policies\PaymentPolicy;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Gate;
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
+        Agency::class => AgencyPolicy::class,
         Booking::class => BookingPolicy::class,
         Customer::class => CustomerPolicy::class,
         Payment::class => PaymentPolicy::class,

@@ -2,19 +2,24 @@
 
 namespace App\Notifications;
 
-use App\Notifications\Channels\SmsChannel;
+use App\Models\Booking;
+use App\Notifications\Concerns\HasNotificationPreferences;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class BookingCreatedNotification extends Notification
+class BookingCreatedNotification extends Notification implements ShouldQueue
 {
+    use HasNotificationPreferences, Queueable;
+
     public function __construct(
-        public $booking,
+        public Booking $booking,
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', SmsChannel::class];
+        return $this->resolveViaChannels($notifiable, ['mail', 'database']);
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -23,7 +28,7 @@ class BookingCreatedNotification extends Notification
 
         return (new MailMessage)
             ->subject($isCustomer ? 'Booking Confirmation - CarRental.ma' : 'New Booking Received - CarRental.ma')
-            ->greeting($isCustomer ? "Dear {$notifiable->name}," : "Dear {$notifiable->name},")
+            ->greeting("Dear {$notifiable->name},")
             ->line($isCustomer
                 ? "Your booking #{$this->booking->id} has been created successfully."
                 : "A new booking #{$this->booking->id} has been received."
@@ -38,12 +43,26 @@ class BookingCreatedNotification extends Notification
             );
     }
 
-    public function toSms(object $notifiable): string
+    public function toDatabase(object $notifiable): array
     {
         $isCustomer = $notifiable->hasRole('customer');
 
-        return $isCustomer
-            ? "CarRental.ma: Booking #{$this->booking->id} created. {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model} from {$this->booking->pickup_date?->format('d/m')} to {$this->booking->return_date?->format('d/m')}."
-            : "CarRental.ma: New booking #{$this->booking->id} received. {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model}, {$this->booking->pickup_date?->format('d/m')} - {$this->booking->return_date?->format('d/m')}.";
+        return [
+            'type' => 'booking_created',
+            'title' => $isCustomer
+                ? "Booking #{$this->booking->id} Created"
+                : "New Booking #{$this->booking->id}",
+            'body' => $isCustomer
+                ? "Your booking for {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model} has been created."
+                : "A new booking for {$this->booking->vehicle?->brand} {$this->booking->vehicle?->model} has been received.",
+            'icon' => 'heroicon-o-calendar',
+            'color' => 'warning',
+            'action_url' => $isCustomer
+                ? "/bookings/{$this->booking->id}"
+                : "/agency/bookings/{$this->booking->id}/edit",
+            'action_text' => $isCustomer ? 'View Booking' : 'Review Booking',
+            'model_type' => 'booking',
+            'model_id' => $this->booking->id,
+        ];
     }
 }

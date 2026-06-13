@@ -8,6 +8,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -30,25 +31,17 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(Customer::class);
     }
 
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    public function routeNotificationForSms(): ?string
-    {
-        if ($this->hasRole('customer') && $this->relationLoaded('customer') && $this->customer) {
-            return $this->customer->phone;
-        }
-
-        if ($this->relationLoaded('agency') && $this->agency) {
-            return $this->agency->phone;
-        }
-
-        return null;
     }
 
     public function canAccessPanel(Panel $panel): bool
@@ -58,7 +51,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return match ($panel->getId()) {
-            'agency' => $this->hasRole('agency'),
+            'agency' => $this->hasRole('agency') && $this->agency?->isActive(),
             'admin' => $this->hasRole('super_admin'),
             default => false,
         };

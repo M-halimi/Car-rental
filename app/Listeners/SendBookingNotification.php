@@ -3,10 +3,13 @@
 namespace App\Listeners;
 
 use App\Events\ContractGenerated;
+use App\Events\CustomerUploadedDocuments;
+use App\Events\PaymentPending;
 use App\Events\PaymentReceived;
 use App\Events\ReservationCancelled;
 use App\Events\ReservationConfirmed;
 use App\Events\ReservationCreated;
+use App\Events\VehicleMarkedUnavailable;
 use App\Services\NotificationService;
 
 class SendBookingNotification
@@ -16,14 +19,17 @@ class SendBookingNotification
     ) {}
 
     public function handle(
-        ReservationCreated|ReservationConfirmed|ReservationCancelled|PaymentReceived|ContractGenerated $event
+        ReservationCreated|ReservationConfirmed|ReservationCancelled|PaymentReceived|PaymentPending|ContractGenerated|VehicleMarkedUnavailable|CustomerUploadedDocuments $event
     ): void {
         match (true) {
             $event instanceof ReservationCreated => $this->notificationService->sendBookingCreated($event->booking),
             $event instanceof ReservationConfirmed => $this->notificationService->sendBookingConfirmed($event->booking),
             $event instanceof ReservationCancelled => $this->notificationService->sendBookingCancelled($event->booking),
             $event instanceof PaymentReceived => $this->notificationService->sendPaymentReceived($event->booking, $event->payment),
+            $event instanceof PaymentPending => $this->notificationService->sendPaymentPending($event->booking, $event->payment),
             $event instanceof ContractGenerated => $this->notificationService->sendContractGenerated($event->booking, $event->contract),
+            $event instanceof VehicleMarkedUnavailable => $this->notificationService->sendVehicleMarkedUnavailable($event->vehicle),
+            $event instanceof CustomerUploadedDocuments => $this->notificationService->sendCustomerUploadedDocuments($event->customer, $event->user),
         };
     }
 }

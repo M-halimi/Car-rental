@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Middleware\SetLocale;
-use App\Models\Booking;
-use App\Observers\BookingObserver;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -37,7 +35,4 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })
-    ->booted(function (): void {
-        Booking::observe(BookingObserver::class);
     })->create();

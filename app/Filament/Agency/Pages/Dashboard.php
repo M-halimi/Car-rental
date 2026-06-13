@@ -9,6 +9,7 @@ use App\Filament\Agency\Widgets\AgencyStatsOverviewWidget;
 use App\Filament\Agency\Widgets\MostRentedVehiclesWidget;
 use App\Filament\Agency\Widgets\PaymentStatsWidget;
 use App\Filament\Agency\Widgets\RecentBookingsWidget;
+use App\Filament\Agency\Widgets\RecentNotificationsWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -22,6 +23,7 @@ class Dashboard extends BaseDashboard
             AgencyRevenueChartWidget::class,
             AgencyBookingAnalyticsWidget::class,
             MostRentedVehiclesWidget::class,
+            RecentNotificationsWidget::class,
             RecentBookingsWidget::class,
         ];
     }

@@ -2,72 +2,69 @@
 
 namespace App\Services;
 
+use App\Mail\AgencyCreated;
 use App\Models\Agency;
+use App\Models\AgencySetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class AgencyService
 {
-    public function create(array $data): array
+    public function createWithOwner(array $agencyData, array $ownerData): Agency
     {
-        return DB::transaction(function () use ($data) {
-            $email = $this->resolveEmail($data['email'] ?? null, $data['name']);
-            $password = $data['password'] ?? 'password';
-            $slug = $this->generateUniqueSlug($data['name']);
+        return DB::transaction(function () use ($agencyData, $ownerData) {
+            $password = $ownerData['password'] ?? Str::random(12);
 
             $user = User::create([
-                'name' => $data['name'],
-                'email' => $email,
-                'password' => $password,
+                'name' => $ownerData['name'],
+                'email' => $ownerData['email'],
+                'password' => Hash::make($password),
             ]);
 
             $user->assignRole('agency');
 
-            $agency = Agency::create([
-                'user_id' => $user->id,
-                'city_id' => $data['city_id'],
-                'name' => $data['name'],
-                'slug' => $slug,
-                'email' => $email,
-                'phone' => $data['phone'] ?? '',
-                'address' => $data['address'] ?? '',
-                'description' => $data['description'] ?? null,
-                'is_active' => $data['is_active'] ?? true,
+            $agencyData['slug'] = $agencyData['slug'] ?? Str::slug($agencyData['name']);
+            $agencyData['user_id'] = $user->id;
+
+            /** @var Agency $agency */
+            $agency = Agency::create($agencyData);
+
+            AgencySetting::create([
+                'agency_id' => $agency->id,
             ]);
 
-            return ['user' => $user, 'agency' => $agency];
+            Mail::to($ownerData['email'])->queue(
+                new AgencyCreated($agency, $ownerData['email'], $password)
+            );
+
+            return $agency;
         });
     }
 
-    private function resolveEmail(?string $email, string $name): string
+    public function suspend(Agency $agency): void
     {
-        if ($email && ! User::where('email', $email)->exists()) {
-            return $email;
-        }
-
-        $base = Str::slug($name, '.');
-        $suffix = 1;
-
-        do {
-            $candidate = "{$base}.{$suffix}@carrental.ma";
-            $suffix++;
-        } while (User::where('email', $candidate)->exists());
-
-        return $candidate;
+        $agency->update([
+            'status' => 'suspended',
+            'is_active' => false,
+        ]);
     }
 
-    private function generateUniqueSlug(string $name): string
+    public function activate(Agency $agency): void
     {
-        $base = Str::slug($name);
-        $slug = $base;
-        $suffix = 1;
+        $agency->update([
+            'status' => 'active',
+            'is_active' => true,
+        ]);
+    }
 
-        while (Agency::where('slug', $slug)->exists()) {
-            $slug = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
+    public function markExpired(): int
+    {
+        return Agency::whereNotNull('subscription_end_date')
+            ->where('subscription_end_date', '<', now())
+            ->where('status', '!=', 'expired')
+            ->update(['status' => 'expired', 'is_active' => false]);
     }
 }

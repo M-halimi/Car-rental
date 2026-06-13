@@ -9,11 +9,13 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AgencyPanelProvider extends PanelProvider
@@ -23,7 +25,7 @@ class AgencyPanelProvider extends PanelProvider
         return $panel
             ->id('agency')
             ->path('agency')
-            ->login()
+            ->login(Pages\Auth\Login::class)
             ->colors([
                 'primary' => Color::Amber,
                 'gray' => Color::Zinc,
@@ -34,6 +36,18 @@ class AgencyPanelProvider extends PanelProvider
             ->discoverResources(in: __DIR__.'/Resources', for: 'App\\Filament\\Agency\\Resources')
             ->discoverPages(in: __DIR__.'/Pages', for: 'App\\Filament\\Agency\\Pages')
             ->discoverWidgets(in: __DIR__.'/Widgets', for: 'App\\Filament\\Agency\\Widgets')
+            ->pages([
+                Pages\Dashboard::class,
+                Pages\NotificationHistory::class,
+                Pages\NotificationPreferences::class,
+            ])
+            ->widgets([
+                Widgets\RecentNotificationsWidget::class,
+            ])
+            ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+                fn () => Blade::render('@livewire(\'notification-bell\')'),
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

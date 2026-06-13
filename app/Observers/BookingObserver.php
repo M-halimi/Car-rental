@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\BookingStatus;
+use App\Events\PaymentPending;
 use App\Events\ReservationCancelled;
 use App\Events\ReservationConfirmed;
 use App\Events\ReservationCreated;
@@ -19,7 +20,7 @@ class BookingObserver
         $amount = $booking->total_amount ?? $booking->total_price ?? 0;
         $deposit = $booking->deposit_amount ?? 0;
 
-        Payment::create([
+        $payment = Payment::create([
             'booking_id' => $booking->id,
             'amount' => $amount,
             'deposit_amount' => $deposit,
@@ -30,6 +31,7 @@ class BookingObserver
         ]);
 
         ReservationCreated::dispatch($booking);
+        PaymentPending::dispatch($booking, $payment);
     }
 
     public function updating(Booking $booking): void
