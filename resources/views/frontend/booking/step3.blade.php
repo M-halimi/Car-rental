@@ -2,15 +2,15 @@
 
 @extends('layouts.frontend')
 
-@section('title', __('frontend.upload_documents') . ' - CarRental.ma')
+@section('title', __('frontend.upload_documents') . ' - DriveNow')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">{{ __('frontend.upload_documents') }}</h1>
+    <h1 class="text-2xl font-bold mb-8">{{ __('frontend.upload_documents') }}</h1>
 
-    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+    <div class="max-w-2xl mx-auto bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-8">
         @if($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div class="bg-red-500/10 border border-red-500/20 text-danger px-4 py-3 rounded-lg mb-6 text-sm">
                 <ul class="list-disc list-inside">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -28,41 +28,41 @@
             @endforeach
 
             <div class="mb-6">
-                <label class="block text-gray-700 font-bold mb-2">{{ __('frontend.national_id') }} <span class="text-red-500">*</span></label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-amber-500 transition cursor-pointer" id="id_document_wrapper">
+                <label class="block text-white text-sm font-semibold mb-2">{{ __('frontend.national_id') }} <span class="text-danger">*</span></label>
+                <div class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-xl p-8 text-center hover:border-accent/50 transition cursor-pointer" id="id_document_wrapper">
                     <input type="file" name="id_document" accept="image/*,.pdf" class="hidden" id="id_document" required>
                     <label for="id_document" class="cursor-pointer">
                         <div class="text-4xl mb-2" id="id_document_icon">📄</div>
-                        <p class="text-gray-600" id="id_document_label">{{ __('frontend.upload_click') }}</p>
-                        <p class="text-gray-400 text-sm">{{ __('frontend.upload_format') }}</p>
+                        <p class="text-white/55" id="id_document_label">{{ __('frontend.upload_click') }}</p>
+                        <p class="text-white/30 text-sm mt-1">{{ __('frontend.upload_format') }}</p>
                     </label>
                 </div>
                 @error('id_document')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="mb-8">
-                <label class="block text-gray-700 font-bold mb-2">{{ __('frontend.drivers_license') }} <span class="text-red-500">*</span></label>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-amber-500 transition cursor-pointer" id="license_document_wrapper">
+                <label class="block text-white text-sm font-semibold mb-2">{{ __('frontend.drivers_license') }} <span class="text-danger">*</span></label>
+                <div class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-xl p-8 text-center hover:border-accent/50 transition cursor-pointer" id="license_document_wrapper">
                     <input type="file" name="license_document" accept="image/*,.pdf" class="hidden" id="license_document" required>
                     <label for="license_document" class="cursor-pointer">
                         <div class="text-4xl mb-2" id="license_document_icon">🪪</div>
-                        <p class="text-gray-600" id="license_document_label">{{ __('frontend.upload_click') }}</p>
-                        <p class="text-gray-400 text-sm">{{ __('frontend.upload_format') }}</p>
+                        <p class="text-white/55" id="license_document_label">{{ __('frontend.upload_click') }}</p>
+                        <p class="text-white/30 text-sm mt-1">{{ __('frontend.upload_format') }}</p>
                     </label>
                 </div>
                 @error('license_document')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="flex gap-4">
-                <a href="{{ route('frontend.booking.step2') }}" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg text-center hover:bg-gray-400 font-bold">
-                    ← {{ __('frontend.back') }}
+                <a href="{{ route('frontend.booking.step2') }}" class="flex-1 bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-white/70 hover:text-white py-3 rounded-lg text-center font-medium transition text-sm">
+                    &larr; {{ __('frontend.back') }}
                 </a>
-                <button type="submit" class="flex-1 bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-bold">
-                    {{ __('frontend.next') }} →
+                <button type="submit" class="flex-1 bg-accent hover:bg-accent-hover text-white py-3 rounded-lg font-medium transition text-sm">
+                    {{ __('frontend.next') }} &rarr;
                 </button>
             </div>
         </form>
@@ -81,7 +81,10 @@
             if (this.files.length > 0) {
                 if (icon) icon.textContent = '✅';
                 if (label) label.textContent = this.files[0].name;
-                if (wrapper) wrapper.classList.add('border-amber-500', 'bg-amber-50');
+                if (wrapper) {
+                    wrapper.classList.remove('border-[rgba(255,255,255,0.15)]');
+                    wrapper.classList.add('border-accent/50', 'bg-accent/5');
+                }
             }
         });
     }

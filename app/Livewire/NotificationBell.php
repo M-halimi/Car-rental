@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Livewire\Component;
 
 class NotificationBell extends Component
@@ -10,8 +11,6 @@ class NotificationBell extends Component
     public int $unreadCount = 0;
 
     public array $recentNotifications = [];
-
-    protected $listeners = ['$refresh'];
 
     public function mount(): void
     {
@@ -74,9 +73,12 @@ class NotificationBell extends Component
             return;
         }
 
-        $user->unreadNotifications->markAsRead();
+        $user->unreadNotifications()->update(['read_at' => now()]);
 
-        Filament::notify('success', 'All notifications marked as read.');
+        Notification::make()
+            ->title('All notifications marked as read.')
+            ->success()
+            ->send();
 
         $this->refreshNotifications();
     }

@@ -15,7 +15,6 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AgencyPanelProvider extends PanelProvider
@@ -46,7 +45,7 @@ class AgencyPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
-                fn () => Blade::render('@livewire(\'notification-bell\')'),
+                fn () => view('partials.notification-bell'),
             )
             ->middleware([
                 EncryptCookies::class,

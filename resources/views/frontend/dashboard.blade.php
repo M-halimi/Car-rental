@@ -4,191 +4,163 @@
 
 @extends('layouts.frontend')
 
-@section('title', __('frontend.my_dashboard') . ' - CarRental.ma')
+@section('title', __('frontend.my_dashboard') . ' - DriveNow')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ __('frontend.my_dashboard') }}</h1>
-            <p class="text-gray-500 mt-1">{{ __('frontend.welcome') }}, {{ $customer->first_name }} {{ $customer->last_name }}</p>
+            <h1 class="text-3xl font-bold">{{ __('frontend.my_dashboard') }}</h1>
+            <p class="text-white/55 mt-1">{{ __('frontend.welcome_back') ?? 'Welcome back' }}, {{ $customer->first_name }} {{ $customer->last_name }}</p>
         </div>
         <a href="{{ route('frontend.vehicles') }}"
-            class="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold transition">
+            class="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-lg font-medium transition text-sm">
             {{ __('frontend.book_now') }}
         </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-amber-50 rounded-xl p-6 text-center border border-amber-200">
-            <div class="text-3xl font-bold text-amber-700">{{ $activeBookings }}</div>
-            <div class="text-amber-600 font-medium">{{ __('frontend.active_bookings') }}</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0M9 13V5h2m0 0l4 4m-4-4H9m0 0H5m4 8h6"/></svg>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold">{{ $activeBookings }}</div>
+                    <div class="text-white/55 text-sm">{{ __('frontend.active_rentals') }}</div>
+                </div>
+            </div>
         </div>
-        <div class="bg-green-50 rounded-xl p-6 text-center border border-green-200">
-            <div class="text-3xl font-bold text-green-700">{{ $completedBookings }}</div>
-            <div class="text-green-600 font-medium">{{ __('frontend.completed_rentals') }}</div>
+        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold">{{ $totalBookings }}</div>
+                    <div class="text-white/55 text-sm">{{ __('frontend.total_bookings') }}</div>
+                </div>
+            </div>
         </div>
-        <div class="bg-blue-50 rounded-xl p-6 text-center border border-blue-200">
-            <div class="text-3xl font-bold text-blue-700">{{ $totalBookings }}</div>
-            <div class="text-blue-600 font-medium">{{ __('frontend.total_rentals') }}</div>
-        </div>
-        <div class="bg-purple-50 rounded-xl p-6 text-center border border-purple-200">
-            <div class="text-3xl font-bold text-purple-700">{{ number_format($totalPaid, 0) }}</div>
-            <div class="text-purple-600 font-medium">{{ __('frontend.total_paid') ?? 'Total Paid' }}</div>
-            <div class="text-xs text-purple-400 mt-1">{{ __('frontend.dh') }}</div>
+        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold">{{ number_format($totalPaid, 0) }}</div>
+                    <div class="text-white/55 text-sm">{{ __('frontend.total_spent') }}</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold mb-6">{{ __('frontend.my_bookings') }}</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="lg:col-span-2 bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+            <h2 class="text-lg font-bold mb-6">{{ __('frontend.my_bookings') }}</h2>
 
-        @if ($bookings->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 text-gray-500 uppercase tracking-wider text-xs">
-                            <th class="text-left py-3 px-2">{{ __('frontend.booking_reference') }}</th>
-                            <th class="text-left py-3 px-2">{{ __('frontend.vehicle') }}</th>
-                            <th class="text-left py-3 px-2">{{ __('frontend.pickup_date') }}</th>
-                            <th class="text-left py-3 px-2">{{ __('frontend.return_date') }}</th>
-                            <th class="text-left py-3 px-2">{{ __('frontend.total_amount') }}</th>
-                            <th class="text-left py-3 px-2">{{ __('frontend.status') }}</th>
-                            <th class="text-right py-3 px-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($bookings as $booking)
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                <td class="py-3 px-2 font-medium">#{{ $booking->id }}</td>
-                                <td class="py-3 px-2">{{ $booking->vehicle->brand }} {{ $booking->vehicle->model }}</td>
-                                <td class="py-3 px-2">{{ $booking->pickup_date->format('M d, Y') }}</td>
-                                <td class="py-3 px-2">{{ $booking->return_date->format('M d, Y') }}</td>
-                                <td class="py-3 px-2 font-medium">{{ number_format($booking->total_price ?? $booking->total_amount, 2) }} {{ __('frontend.dh') }}</td>
-                                <td class="py-3 px-2">
-                                    <span class="inline-block px-2.5 py-1 rounded-full text-xs font-medium
-                                        @switch($booking->status)
-                                            @case('pending') bg-yellow-100 text-yellow-700 @break
-                                            @case('confirmed') bg-blue-100 text-blue-700 @break
-                                            @case('active') bg-green-100 text-green-700 @break
-                                            @case('completed') bg-gray-100 text-gray-700 @break
-                                            @case('cancelled') bg-red-100 text-red-700 @break
-                                            @default bg-gray-100 text-gray-700
-                                        @endswitch">
-                                        {{ __("frontend.{$booking->status}") }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-2 text-right">
-                                    <a href="{{ route('frontend.booking.detail', $booking->id) }}" class="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                                        {{ __('frontend.view_details') }}
-                                    </a>
-                                    @if(!in_array($booking->status, ['cancelled', 'completed', 'failed', 'expired']))
-                                        <form action="{{ route('frontend.booking.cancel', $booking->id) }}" method="POST" class="inline ml-2" onsubmit="return confirm('{{ __('frontend.booking_cancel_confirm') }}')">
-                                            @csrf
-                                            <button type="submit" class="text-red-600 hover:text-red-700 text-sm font-medium">
-                                                {{ __('frontend.booking_cancel') }}
-                                            </button>
-                                        </form>
-                                    @endif
-                                </td>
+            @if ($bookings->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-[rgba(255,255,255,0.06)] text-white/40 uppercase tracking-wider text-xs">
+                                <th class="text-left py-3 px-2 font-medium">{{ __('frontend.car') }}</th>
+                                <th class="text-left py-3 px-2 font-medium">{{ __('frontend.start_date') }}</th>
+                                <th class="text-left py-3 px-2 font-medium">{{ __('frontend.end_date') }}</th>
+                                <th class="text-left py-3 px-2 font-medium">{{ __('frontend.price') }}</th>
+                                <th class="text-left py-3 px-2 font-medium">{{ __('frontend.status') }}</th>
+                                <th class="text-right py-3 px-2 font-medium"></th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach ($bookings as $booking)
+                                <tr class="border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.03)] transition">
+                                    <td class="py-3.5 px-2 font-medium">{{ $booking->vehicle->brand }} {{ $booking->vehicle->model }}</td>
+                                    <td class="py-3.5 px-2 text-white/55">{{ $booking->pickup_date->format('M d, Y') }}</td>
+                                    <td class="py-3.5 px-2 text-white/55">{{ $booking->return_date->format('M d, Y') }}</td>
+                                    <td class="py-3.5 px-2 font-medium">{{ number_format($booking->total_price ?? $booking->total_amount, 0) }} {{ __('frontend.dh') }}</td>
+                                    <td class="py-3.5 px-2">
+                                        <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-medium border
+                                            @switch($booking->status)
+                                                @case('pending') bg-yellow-500/10 text-warning border-yellow-500/20 @break
+                                                @case('confirmed') bg-blue-500/10 text-accent border-accent/20 @break
+                                                @case('active') bg-green-500/10 text-success border-green-500/20 @break
+                                                @case('completed') bg-white/5 text-white/55 border-[rgba(255,255,255,0.1)] @break
+                                                @case('cancelled') bg-red-500/10 text-danger border-red-500/20 @break
+                                                @default bg-white/5 text-white/55 border-[rgba(255,255,255,0.1)]
+                                            @endswitch">
+                                            {{ __("frontend.{$booking->status}") }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3.5 px-2 text-right">
+                                        <a href="{{ route('frontend.booking.detail', $booking->id) }}" class="text-accent hover:text-accent-hover text-sm font-medium">
+                                            {{ __('frontend.view_details') }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="mt-6">
-                {{ $bookings->links() }}
-            </div>
-        @else
-            <div class="text-center py-12">
-                <div class="text-4xl mb-4">🚗</div>
-                <p class="text-gray-500 mb-6">{{ __('frontend.no_bookings_yet') }}</p>
-                <a href="{{ route('frontend.vehicles') }}"
-                    class="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold transition inline-block">
-                    {{ __('frontend.browse_cars') }}
-                </a>
-            </div>
-        @endif
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-6">📄 {{ __('frontend.my_invoices') }}</h2>
-
-            @if ($invoices->count() > 0)
-                <div class="space-y-3">
-                    @foreach ($invoices as $booking)
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-amber-50 transition">
-                            <div>
-                                <p class="font-medium text-gray-800">#BK{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</p>
-                                <p class="text-sm text-gray-500">{{ $booking->vehicle->brand }} {{ $booking->vehicle->model }}</p>
-                                <p class="text-xs text-gray-400">{{ __('frontend.invoice_date') }}: {{ $booking->created_at->format('M d, Y') }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-amber-600">{{ number_format($booking->total_amount, 2) }} {{ __('frontend.dh') }}</p>
-                                <a href="{{ route('frontend.booking.invoice', $booking->id) }}" class="text-sm text-blue-600 hover:text-blue-700">
-                                    {{ __('frontend.download_invoice') }}
-                                </a>
-                            </div>
-                        </div>
-                    @endforeach
+                <div class="mt-6">
+                    {{ $bookings->links() }}
                 </div>
             @else
-                <div class="text-center py-8 text-gray-500">
-                    <p>{{ __('frontend.no_invoices') }}</p>
+                <div class="text-center py-12">
+                    <div class="text-4xl mb-4">🚗</div>
+                    <p class="text-white/55 mb-6">{{ __('frontend.no_bookings_yet') }}</p>
+                    <a href="{{ route('frontend.vehicles') }}"
+                        class="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-lg font-medium transition inline-block text-sm">
+                        {{ __('frontend.browse_cars') }}
+                    </a>
                 </div>
             @endif
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">💰 {{ __('frontend.payments') ?? 'Payments' }}</h2>
-                <a href="{{ route('frontend.payments') }}"
-                    class="text-amber-600 hover:text-amber-700 text-sm font-medium">
-                    {{ __('frontend.view_all') ?? 'View All' }} →
-                </a>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
-                    <p class="text-2xl font-bold text-green-700">{{ number_format($totalPaid, 0) }}</p>
-                    <p class="text-xs text-green-600">{{ __('frontend.dh') }} {{ __('frontend.total_paid') ?? 'Total Paid' }}</p>
-                </div>
-                <div class="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-200">
-                    <p class="text-2xl font-bold text-yellow-700">{{ $pendingPaymentCount }}</p>
-                    <p class="text-xs text-yellow-600">{{ __('frontend.pending') ?? 'Pending' }}</p>
-                </div>
-            </div>
-
-            @if ($recentPayments->count() > 0)
-                <div class="space-y-2">
-                    @foreach ($recentPayments as $payment)
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-amber-50 transition">
-                            <div>
-                                <p class="font-medium text-gray-800 text-sm">#{{ $payment->booking_id }}</p>
-                                <p class="text-xs text-gray-500">{{ $payment->booking?->vehicle?->brand ?? '' }} {{ $payment->booking?->vehicle?->model ?? '' }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-amber-600 text-sm">{{ number_format($payment->amount, 2) }} {{ __('frontend.dh') }}</p>
-                                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium
-                                    @switch($payment->status)
-                                        @case('completed') bg-green-100 text-green-700 @break
-                                        @case('pending') bg-yellow-100 text-yellow-700 @break
-                                        @case('partial') bg-blue-100 text-blue-700 @break
-                                        @case('refunded') bg-gray-100 text-gray-700 @break
-                                        @default bg-gray-100 text-gray-600
-                                    @endswitch">
-                                    {{ ucfirst($payment->status) }}
-                                </span>
-                            </div>
+        <div class="space-y-6">
+            <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+                <h2 class="text-lg font-bold mb-4">{{ __('frontend.current_rental') }}</h2>
+                @php
+                    $activeRental = $bookings->firstWhere('status', 'active');
+                @endphp
+                @if($activeRental)
+                    <div class="space-y-3">
+                        <p class="font-semibold">{{ $activeRental->vehicle->brand }} {{ $activeRental->vehicle->model }}</p>
+                        <div class="text-sm text-white/55">
+                            <p>{{ $activeRental->pickup_date->format('M d') }} - {{ $activeRental->return_date->format('M d, Y') }}</p>
                         </div>
-                    @endforeach
+                        <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-medium border bg-green-500/10 text-success border-green-500/20">
+                            {{ __('frontend.active') }}
+                        </span>
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <div class="text-3xl mb-2">🔑</div>
+                        <p class="text-white/55 text-sm">{{ __('frontend.no_active_rental') }}</p>
+                    </div>
+                @endif
+            </div>
+
+            <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+                <h2 class="text-lg font-bold mb-4">{{ __('frontend.quick_actions') }}</h2>
+                <div class="space-y-3">
+                    <a href="{{ route('frontend.vehicles') }}"
+                        class="flex items-center gap-3 bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] rounded-lg p-3 transition">
+                        <div class="w-9 h-9 bg-accent/10 rounded-lg flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 17v2a1 1 0 001 1h12a1 1 0 001-1v-2M5 17l-3-8 4-3h12l4 3-3 8M5 17h14"/></svg>
+                        </div>
+                        <span class="font-medium text-sm">{{ __('frontend.browse_vehicles') }}</span>
+                    </a>
+                    <a href="{{ route('frontend.payments') }}"
+                        class="flex items-center gap-3 bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] rounded-lg p-3 transition">
+                        <div class="w-9 h-9 bg-accent/10 rounded-lg flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <span class="font-medium text-sm">{{ __('frontend.view_payments') ?? 'View Payments' }}</span>
+                    </a>
                 </div>
-            @else
-                <div class="text-center py-6 text-gray-500">
-                    <p>{{ __('frontend.no_payments_yet') ?? 'No payments yet' }}</p>
-                </div>
-            @endif
+            </div>
         </div>
     </div>
 </div>
