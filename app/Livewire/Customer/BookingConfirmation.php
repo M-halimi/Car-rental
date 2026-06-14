@@ -4,9 +4,13 @@ namespace App\Livewire\Customer;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\Customer;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\AvailabilityService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -24,10 +28,22 @@ class BookingConfirmation extends Component
 
     public ?string $errorMessage = null;
 
+    public ?string $guestName = null;
+
+    public ?string $guestEmail = null;
+
+    public ?string $guestPhone = null;
+
     public function mount(): void
     {
         if (session('booking_completed')) {
-            $this->redirectRoute('frontend.dashboard');
+            $bookingId = session('booking_completed_booking_id');
+
+            if ($bookingId) {
+                $this->redirectRoute('frontend.booking.success', $bookingId);
+            } else {
+                $this->redirectRoute('frontend.dashboard');
+            }
 
             return;
         }
@@ -87,13 +103,60 @@ class BookingConfirmation extends Component
             return;
         }
 
-        $customer = auth()->user()?->customer;
+        if (! auth()->check()) {
+            $this->validate([
+                'guestName' => 'required|string|max:255',
+                'guestEmail' => 'required|email|max:255',
+                'guestPhone' => 'required|string|max:20',
+            ]);
 
-        if (! $customer) {
-            $this->addError('customer', 'Customer profile not found.');
-            $this->submitting = false;
+            $existingUser = User::where('email', $this->guestEmail)->first();
 
-            return;
+            if ($existingUser) {
+                $user = $existingUser;
+                $customer = $user->customer;
+
+                if (! $customer) {
+                    $nameParts = explode(' ', $this->guestName, 2);
+
+                    $customer = Customer::create([
+                        'user_id' => $user->id,
+                        'first_name' => $nameParts[0] ?? $this->guestName,
+                        'last_name' => $nameParts[1] ?? '',
+                        'phone' => $this->guestPhone,
+                    ]);
+                }
+
+                Auth::login($user);
+            } else {
+                $nameParts = explode(' ', $this->guestName, 2);
+
+                $user = User::create([
+                    'name' => $this->guestName,
+                    'email' => $this->guestEmail,
+                    'password' => Hash::make((string) Str::uuid()),
+                ]);
+
+                $user->assignRole('customer');
+
+                $customer = Customer::create([
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0] ?? $this->guestName,
+                    'last_name' => $nameParts[1] ?? '',
+                    'phone' => $this->guestPhone,
+                ]);
+
+                Auth::login($user);
+            }
+        } else {
+            $customer = auth()->user()?->customer;
+
+            if (! $customer) {
+                $this->addError('customer', 'Customer profile not found.');
+                $this->submitting = false;
+
+                return;
+            }
         }
 
         try {
@@ -151,7 +214,13 @@ class BookingConfirmation extends Component
             if ($e->getMessage() === 'booking_already_processed') {
                 session()->flash('success', __('frontend.booking_already_confirmed'));
 
-                $this->redirectRoute('frontend.dashboard');
+                $bookingId = session('booking_completed_booking_id');
+
+                if ($bookingId) {
+                    $this->redirectRoute('frontend.booking.success', $bookingId);
+                } else {
+                    $this->redirectRoute('frontend.dashboard');
+                }
 
                 return;
             }
@@ -171,11 +240,11 @@ class BookingConfirmation extends Component
 
         session()->forget('booking_data');
         session()->forget('booking_token');
-        session(['booking_completed' => true]);
+        session(['booking_completed' => true, 'booking_completed_booking_id' => $booking->id]);
 
         session()->flash('success', __('frontend.booking_confirmed_success', ['id' => '#BK'.str_pad($booking->id, 6, '0', STR_PAD_LEFT)]));
 
-        $this->redirectRoute('frontend.dashboard');
+        $this->redirectRoute('frontend.booking.success', $booking->id);
     }
 
     public function render()

@@ -7,6 +7,7 @@ use App\Http\Controllers\Frontend\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\LanguageController;
 use App\Livewire\Customer\BookingConfirmation;
+use App\Livewire\Customer\BookingSuccess;
 use App\Livewire\Customer\PaymentHistoryPage;
 use App\Models\Booking;
 use App\Models\Payment;
@@ -25,12 +26,14 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logou
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('frontend.register');
 Route::post('/register', [RegisterController::class, 'register']);
 
+Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
+Route::match(['get', 'post'], '/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
+Route::match(['get', 'post'], '/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
+Route::match(['get', 'post'], '/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
+Route::get('/booking/confirm', BookingConfirmation::class)->name('frontend.booking.confirm');
+
 Route::middleware(['auth', 'role:customer'])->group(function () {
-    Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
-    Route::match(['get', 'post'], '/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
-    Route::match(['get', 'post'], '/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
-    Route::match(['get', 'post'], '/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
-    Route::get('/booking/confirm', BookingConfirmation::class)->name('frontend.booking.confirm');
+    Route::get('/booking/success/{booking}', BookingSuccess::class)->name('frontend.booking.success');
     Route::get('/booking/{id}', [BookingController::class, 'detail'])->name('frontend.booking.detail');
     Route::get('/booking/{id}/invoice', [BookingController::class, 'invoice'])->name('frontend.booking.invoice');
     Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('frontend.booking.cancel');

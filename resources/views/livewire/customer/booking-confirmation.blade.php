@@ -11,6 +11,41 @@
                 @endif
 
                 <form wire:submit.prevent="confirmBooking" class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+                    @guest
+                        <div class="mb-6 p-5 bg-[rgba(255,255,255,0.04)] rounded-xl border border-[rgba(255,255,255,0.08)]">
+                            <h3 class="text-sm font-semibold text-white/55 uppercase tracking-wider mb-4">{{ __('frontend.customer_information') }}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.full_name') }} <span class="text-danger">*</span></label>
+                                    <input type="text" wire:model="guestName"
+                                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
+                                        placeholder="{{ __('frontend.full_name') }}">
+                                    @error('guestName')
+                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.email') }} <span class="text-danger">*</span></label>
+                                    <input type="email" wire:model="guestEmail"
+                                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
+                                        placeholder="email@example.com">
+                                    @error('guestEmail')
+                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.phone_number') }} <span class="text-danger">*</span></label>
+                                    <input type="tel" wire:model="guestPhone"
+                                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
+                                        placeholder="+212 6XX XXX XXX">
+                                    @error('guestPhone')
+                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    @endguest
+
                     <div class="mb-6">
                         <h3 class="text-sm font-semibold text-white/55 uppercase tracking-wider mb-4">{{ __('frontend.booking_details') }}</h3>
                         <div class="bg-[rgba(255,255,255,0.04)] rounded-xl p-4 space-y-2 text-sm">
