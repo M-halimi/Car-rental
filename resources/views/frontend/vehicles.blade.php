@@ -118,7 +118,7 @@
                                 <span class="text-white/55 text-sm">{{ __('frontend.dh') }}{{ __('frontend.per_day') }}</span>
                             </div>
                             <div class="flex gap-2">
-                                <a href="{{ route('frontend.vehicle.detail', ['id' => $vehicle->id]) }}"
+                                <a href="{{ route('frontend.booking.step1', ['vehicle_id' => $vehicle->id]) }}"
                                     class="bg-accent hover:bg-accent-hover text-white text-sm font-medium px-5 py-2 rounded-lg transition">
                                     {{ __('frontend.book_now') }}
                                 </a>

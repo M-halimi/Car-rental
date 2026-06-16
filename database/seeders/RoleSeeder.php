@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
@@ -21,5 +22,24 @@ class RoleSeeder extends Seeder
                 'guard_name' => 'web',
             ]);
         }
+
+        $permissions = [
+            'manage-agencies',
+            'manage-subscriptions',
+            'manage-platform-config',
+            'manage-global-bookings',
+            'manage-moderation',
+            'view-platform-analytics',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
+        $superAdmin = Role::findByName('super_admin', 'web');
+        $superAdmin->givePermissionTo($permissions);
     }
 }

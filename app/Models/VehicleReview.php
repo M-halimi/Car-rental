@@ -17,6 +17,15 @@ class VehicleReview extends Model
         'rating',
         'comment',
         'is_approved',
+        'cleanliness_rating',
+        'service_rating',
+        'condition_rating',
+        'value_rating',
+        'photos',
+        'is_verified_booking',
+        'helpful_count',
+        'agency_response',
+        'agency_responded_at',
     ];
 
     protected function casts(): array
@@ -24,6 +33,14 @@ class VehicleReview extends Model
         return [
             'rating' => 'integer',
             'is_approved' => 'boolean',
+            'cleanliness_rating' => 'integer',
+            'service_rating' => 'integer',
+            'condition_rating' => 'integer',
+            'value_rating' => 'integer',
+            'photos' => 'array',
+            'is_verified_booking' => 'boolean',
+            'helpful_count' => 'integer',
+            'agency_responded_at' => 'datetime',
         ];
     }
 

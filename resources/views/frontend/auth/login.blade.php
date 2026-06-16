@@ -15,7 +15,7 @@
             <h1 class="text-xl font-bold">{{ __('frontend.login') }}</h1>
         </div>
 
-        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-8">
+        <div class="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-xl p-8">
             @if ($errors->any())
                 <div class="bg-red-500/10 border border-red-500/20 text-danger p-3 rounded-lg mb-4 text-sm">
                     {{ $errors->first() }}
@@ -26,20 +26,20 @@
                 @csrf
 
                 <div>
-                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.email') }}</label>
+                    <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.email') }}</label>
                     <input type="email" name="email" value="{{ old('email') }}" required
-                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.password') }}</label>
+                    <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.password') }}</label>
                     <input type="password" name="password" required
-                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                 </div>
 
                 <div class="flex items-center">
-                    <label class="flex items-center gap-2 text-sm text-white/55">
-                        <input type="checkbox" name="remember" class="rounded accent-accent bg-dark border-[rgba(255,255,255,0.1)]">
+                    <label class="flex items-center gap-2 text-sm text-gray-500 dark:text-white/55">
+                        <input type="checkbox" name="remember" class="rounded accent-accent bg-white dark:bg-dark border-gray-200 dark:border-white/[0.1]">
                         {{ __('frontend.remember_me') }}
                     </label>
                 </div>
@@ -49,7 +49,7 @@
                     {{ __('frontend.login') }}
                 </button>
 
-                <p class="text-center text-sm text-white/55">
+                <p class="text-center text-sm text-gray-500 dark:text-white/55">
                     {{ __('frontend.no_account') }}?
                     <a href="{{ route('frontend.register') }}" class="text-accent hover:text-accent-hover font-medium">{{ __('frontend.register') }}</a>
                 </p>

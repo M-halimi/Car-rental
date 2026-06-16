@@ -8,70 +8,70 @@
                 </svg>
             </div>
             <h1 class="text-3xl font-bold mb-2">{{ __('frontend.booking_success_title') }}</h1>
-            <p class="text-white/55 text-lg">{{ __('frontend.booking_success_subtitle') }}</p>
+            <p class="text-gray-500 dark:text-white/55 text-lg">{{ __('frontend.booking_success_subtitle') }}</p>
         </div>
 
         {{-- Reservation Number --}}
-        <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6 text-center mb-8">
-            <p class="text-white/55 text-sm mb-1">{{ __('frontend.reservation_number') }}</p>
+        <div class="bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-xl p-6 text-center mb-8">
+            <p class="text-gray-500 dark:text-white/55 text-sm mb-1">{{ __('frontend.reservation_number') }}</p>
             <p class="text-2xl font-bold text-accent">#BK{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</p>
         </div>
 
         {{-- Reservation Summary Card --}}
-        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden mb-8">
+        <div class="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-xl overflow-hidden mb-8">
             <div class="p-6">
-                <h3 class="text-sm font-semibold text-white/55 uppercase tracking-wider mb-4">{{ __('frontend.booking_summary') }}</h3>
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-white/55 uppercase tracking-wider mb-4">{{ __('frontend.booking_summary') }}</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <h4 class="text-xs text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.vehicle') }}</h4>
+                        <h4 class="text-xs text-gray-400 dark:text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.vehicle') }}</h4>
                         <p class="font-semibold">{{ $booking->vehicle->brand }} {{ $booking->vehicle->model }}</p>
-                        <p class="text-white/55 text-sm">{{ $booking->vehicle->year }} &bull; {{ __("frontend.{$booking->vehicle->transmission}") }}</p>
+                        <p class="text-gray-500 dark:text-white/55 text-sm">{{ $booking->vehicle->year }} &bull; {{ __("frontend.{$booking->vehicle->transmission}") }}</p>
                     </div>
                     <div>
-                        <h4 class="text-xs text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.dates') ?? 'Dates' }}</h4>
+                        <h4 class="text-xs text-gray-400 dark:text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.dates') ?? 'Dates' }}</h4>
                         <div class="flex items-center gap-2 text-sm mb-1">
                             <svg class="w-4 h-4 text-accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
-                            <span class="text-white/70">{{ __('frontend.pickup') }}: {{ $booking->pickup_date->format('M d, Y') }}</span>
+                            <span class="text-gray-600 dark:text-white/70">{{ __('frontend.pickup') }}: {{ $booking->pickup_date->format('M d, Y') }}</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm">
                             <svg class="w-4 h-4 text-danger shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
-                            <span class="text-white/70">{{ __('frontend.return') }}: {{ $booking->return_date->format('M d, Y') }}</span>
+                            <span class="text-gray-600 dark:text-white/70">{{ __('frontend.return') }}: {{ $booking->return_date->format('M d, Y') }}</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="border-t border-[rgba(255,255,255,0.06)] mt-4 pt-4">
+                <div class="border-t border-gray-200 dark:border-white/[0.06] mt-4 pt-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="text-xs text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.pickup_location') }}</h4>
+                            <h4 class="text-xs text-gray-400 dark:text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.pickup_location') }}</h4>
                             <p class="text-sm">{{ $booking->pickupCity?->name ?? 'N/A' }}</p>
                         </div>
                         @if ($booking->returnCity && $booking->returnCity->id !== $booking->pickupCity?->id)
                             <div>
-                                <h4 class="text-xs text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.return_location') }}</h4>
+                                <h4 class="text-xs text-gray-400 dark:text-white/40 uppercase tracking-wider mb-2">{{ __('frontend.return_location') }}</h4>
                                 <p class="text-sm">{{ $booking->returnCity->name }}</p>
                             </div>
                         @endif
                     </div>
                 </div>
 
-                <div class="border-t border-[rgba(255,255,255,0.06)] mt-4 pt-4">
+                <div class="border-t border-gray-200 dark:border-white/[0.06] mt-4 pt-4">
                     <div class="flex justify-between text-sm mb-1">
-                        <span class="text-white/55">{{ $booking->daily_rate }} {{ __('frontend.dh') }} &times; {{ $booking->total_days }} {{ __('frontend.days') }}</span>
+                        <span class="text-gray-500 dark:text-white/55">{{ $booking->daily_rate }} {{ __('frontend.dh') }} &times; {{ $booking->total_days }} {{ __('frontend.days') }}</span>
                         <span>{{ $booking->subtotal }} {{ __('frontend.dh') }}</span>
                     </div>
                     @if ($booking->extras_price > 0)
                         <div class="flex justify-between text-sm mb-1">
-                            <span class="text-white/55">{{ __('frontend.extras') }}</span>
+                            <span class="text-gray-500 dark:text-white/55">{{ __('frontend.extras') }}</span>
                             <span>{{ $booking->extras_price }} {{ __('frontend.dh') }}</span>
                         </div>
                     @endif
-                    <div class="flex justify-between text-lg font-bold mt-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
+                    <div class="flex justify-between text-lg font-bold mt-3 pt-3 border-t border-gray-200 dark:border-white/[0.06]">
                         <span>{{ __('frontend.total') }}</span>
                         <span class="text-accent">{{ $booking->total_amount ?? $booking->total_price }} {{ __('frontend.dh') }}</span>
                     </div>
@@ -81,41 +81,41 @@
 
         {{-- Trust Badges --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+            <div class="bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-xl p-4 text-center">
                 <div class="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
                     <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
                 </div>
                 <p class="text-xs font-semibold">{{ __('frontend.trust_secure') }}</p>
-                <p class="text-white/40 text-xs mt-0.5">{{ __('frontend.trust_secure_desc') }}</p>
+                <p class="text-gray-400 dark:text-white/40 text-xs mt-0.5">{{ __('frontend.trust_secure_desc') }}</p>
             </div>
-            <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+            <div class="bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-xl p-4 text-center">
                 <div class="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-2">
                     <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                     </svg>
                 </div>
                 <p class="text-xs font-semibold">{{ __('frontend.trust_best_price') }}</p>
-                <p class="text-white/40 text-xs mt-0.5">{{ __('frontend.trust_best_price_desc') }}</p>
+                <p class="text-gray-400 dark:text-white/40 text-xs mt-0.5">{{ __('frontend.trust_best_price_desc') }}</p>
             </div>
-            <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+            <div class="bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-xl p-4 text-center">
                 <div class="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
                     <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
                 </div>
                 <p class="text-xs font-semibold">{{ __('frontend.trust_support') }}</p>
-                <p class="text-white/40 text-xs mt-0.5">{{ __('frontend.trust_support_desc') }}</p>
+                <p class="text-gray-400 dark:text-white/40 text-xs mt-0.5">{{ __('frontend.trust_support_desc') }}</p>
             </div>
-            <div class="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] rounded-xl p-4 text-center">
+            <div class="bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-xl p-4 text-center">
                 <div class="w-10 h-10 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-2">
                     <svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <p class="text-xs font-semibold">{{ __('frontend.trust_flexible') }}</p>
-                <p class="text-white/40 text-xs mt-0.5">{{ __('frontend.trust_flexible_desc') }}</p>
+                <p class="text-gray-400 dark:text-white/40 text-xs mt-0.5">{{ __('frontend.trust_flexible_desc') }}</p>
             </div>
         </div>
 
@@ -128,29 +128,29 @@
                     </svg>
                 </div>
                 <h2 class="text-xl font-bold mb-2">{{ __('frontend.manage_online_title') }}</h2>
-                <p class="text-white/55 text-sm mb-6">{{ __('frontend.manage_online_desc') }}</p>
+                <p class="text-gray-500 dark:text-white/55 text-sm mb-6">{{ __('frontend.manage_online_desc') }}</p>
 
                 @if (! $showPasswordForm)
                     <button wire:click="showPasswordForm" class="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl font-semibold transition text-sm cursor-pointer">
                         {{ __('frontend.create_my_account') }}
                     </button>
                 @else
-                    <div class="bg-dark/50 rounded-xl p-6" wire:loading.class="opacity-50">
+                    <div class="bg-white/50 dark:bg-dark/50 rounded-xl p-6" wire:loading.class="opacity-50">
                         <div class="space-y-4 text-left">
-                            <p class="text-sm text-white/70 text-center mb-4">{{ __('frontend.create_account_form_intro') ?? 'Set your password to create your account.' }}</p>
+                            <p class="text-sm text-gray-600 dark:text-white/70 text-center mb-4">{{ __('frontend.create_account_form_intro') ?? 'Set your password to create your account.' }}</p>
                             <div>
-                                <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.password') }}</label>
+                                <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.password') }}</label>
                                 <input type="password" wire:model="password"
-                                    class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
+                                    class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
                                     placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;">
                                 @error('password')
                                     <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.confirm_password') }}</label>
+                                <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.confirm_password') }}</label>
                                 <input type="password" wire:model="passwordConfirmation"
-                                    class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
+                                    class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm"
                                     placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;">
                             </div>
                             <button wire:click="setPassword" wire:loading.attr="disabled"
@@ -175,7 +175,7 @@
 
         {{-- Back to Home --}}
         <div class="text-center">
-            <a href="{{ route('frontend.home') }}" class="text-white/55 hover:text-white transition text-sm font-medium">
+            <a href="{{ route('frontend.home') }}" class="text-gray-500 dark:text-white/55 hover:text-gray-700 dark:hover:text-white transition text-sm font-medium">
                 &larr; {{ __('frontend.back_to_home') }}
             </a>
         </div>

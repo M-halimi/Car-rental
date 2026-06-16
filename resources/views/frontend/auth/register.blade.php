@@ -15,7 +15,7 @@
             <h1 class="text-xl font-bold">{{ __('frontend.register') }}</h1>
         </div>
 
-        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-8">
+        <div class="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-xl p-8">
             @if ($errors->any())
                 <div class="bg-red-500/10 border border-red-500/20 text-danger p-3 rounded-lg mb-4 text-sm">
                     <ul class="list-disc list-inside">
@@ -31,39 +31,39 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.first_name') }}</label>
+                        <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.first_name') }}</label>
                         <input type="text" name="first_name" value="{{ old('first_name') }}" required
-                            class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                     </div>
                     <div>
-                        <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.last_name') }}</label>
+                        <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.last_name') }}</label>
                         <input type="text" name="last_name" value="{{ old('last_name') }}" required
-                            class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                            class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.email') }}</label>
+                    <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.email') }}</label>
                     <input type="email" name="email" value="{{ old('email') }}" required
-                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.phone') }}</label>
+                    <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.phone') }}</label>
                     <input type="text" name="phone" value="{{ old('phone') }}" required
-                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.password') }}</label>
+                    <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.password') }}</label>
                     <input type="password" name="password" required
-                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-white/70 mb-1.5">{{ __('frontend.confirm_password') }}</label>
+                    <label class="block text-sm text-gray-600 dark:text-white/70 mb-1.5">{{ __('frontend.confirm_password') }}</label>
                     <input type="password" name="password_confirmation" required
-                        class="w-full px-4 py-2.5 bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
+                        class="w-full px-4 py-2.5 bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg focus:outline-none focus:border-accent transition text-sm">
                 </div>
 
                 <button type="submit"
@@ -71,7 +71,7 @@
                     {{ __('frontend.register') }}
                 </button>
 
-                <p class="text-center text-sm text-white/55">
+                <p class="text-center text-sm text-gray-500 dark:text-white/55">
                     {{ __('frontend.has_account') }}?
                     <a href="{{ route('frontend.login') }}" class="text-accent hover:text-accent-hover font-medium">{{ __('frontend.login') }}</a>
                 </p>

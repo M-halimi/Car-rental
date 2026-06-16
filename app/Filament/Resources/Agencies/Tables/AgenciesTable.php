@@ -10,6 +10,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -94,6 +95,8 @@ class AgenciesTable
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
+                ViewAction::make()
+                    ->url(fn (Agency $record): string => AgencyResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
                     ->url(fn (Agency $record): string => AgencyResource::getUrl('edit', ['record' => $record])),
                 Action::make('suspend')

@@ -12,7 +12,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
-            <form action="{{ route('frontend.booking.step2') }}" method="POST" class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6">
+            <form action="{{ route('frontend.booking.step2') }}" method="POST" class="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-xl p-6">
                 @csrf
                 <input type="hidden" name="vehicle_id" value="{{ $vehicle->id }}">
 
@@ -24,20 +24,20 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-white/55 text-sm font-semibold mb-2">{{ __('frontend.pickup_location') }}</label>
-                        <select name="pickup_city_id" class="w-full bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition" required>
-                            <option value="" class="bg-dark">{{ __('frontend.select_city_placeholder') }}</option>
+                        <label class="block text-gray-500 dark:text-white/55 text-sm font-semibold mb-2">{{ __('frontend.pickup_location') }}</label>
+                        <select name="pickup_city_id" class="w-full bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition" required>
+                            <option value="" class="bg-white dark:bg-dark">{{ __('frontend.select_city_placeholder') }}</option>
                             @foreach($cities as $city)
-                                <option value="{{ $city->id }}" {{ $vehicle->city_id == $city->id ? 'selected' : '' }} class="bg-dark">{{ $city->name }}</option>
+                                <option value="{{ $city->id }}" {{ $vehicle->city_id == $city->id ? 'selected' : '' }} class="bg-white dark:bg-dark">{{ $city->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-white/55 text-sm font-semibold mb-2">{{ __('frontend.return_location') }}</label>
-                        <select name="return_city_id" class="w-full bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition">
-                            <option value="" class="bg-dark">{{ __('frontend.return_city_same') }}</option>
+                        <label class="block text-gray-500 dark:text-white/55 text-sm font-semibold mb-2">{{ __('frontend.return_location') }}</label>
+                        <select name="return_city_id" class="w-full bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition">
+                            <option value="" class="bg-white dark:bg-dark">{{ __('frontend.return_city_same') }}</option>
                             @foreach($cities as $city)
-                                <option value="{{ $city->id }}" class="bg-dark">{{ $city->name }}</option>
+                                <option value="{{ $city->id }}" class="bg-white dark:bg-dark">{{ $city->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -45,14 +45,14 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>
-                        <label class="block text-white/55 text-sm font-semibold mb-2">{{ __('frontend.pickup_date') }}</label>
+                        <label class="block text-gray-500 dark:text-white/55 text-sm font-semibold mb-2">{{ __('frontend.pickup_date') }}</label>
                         <input type="date" name="pickup_date" value="{{ $pickupDate }}" min="{{ date('Y-m-d') }}"
-                            class="w-full bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition" required>
+                            class="w-full bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition" required>
                     </div>
                     <div>
-                        <label class="block text-white/55 text-sm font-semibold mb-2">{{ __('frontend.return_date') }}</label>
+                        <label class="block text-gray-500 dark:text-white/55 text-sm font-semibold mb-2">{{ __('frontend.return_date') }}</label>
                         <input type="date" name="return_date" value="{{ $returnDate }}" min="{{ date('Y-m-d') }}"
-                            class="w-full bg-dark border border-[rgba(255,255,255,0.1)] text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition" required>
+                            class="w-full bg-white dark:bg-dark border border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white rounded-lg p-3 text-sm focus:outline-none focus:border-accent transition" required>
                     </div>
                 </div>
 
@@ -62,9 +62,9 @@
             </form>
         </div>
 
-        <div class="bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-6 h-fit">
+        <div class="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-xl p-6 h-fit">
             <h3 class="text-lg font-bold mb-4">{{ __('frontend.selected_vehicle') }}</h3>
-            <div class="h-32 rounded-lg overflow-hidden bg-[rgba(255,255,255,0.04)] mb-4 flex items-center justify-center">
+            <div class="h-32 rounded-lg overflow-hidden bg-gray-50 dark:bg-white/[0.04] mb-4 flex items-center justify-center">
                 @if($s1Image)
                     <img src="{{ Storage::url($s1Image) }}" alt="{{ $vehicle->brand }} {{ $vehicle->model }}" class="w-full h-full object-cover">
                 @else
@@ -72,7 +72,7 @@
                 @endif
             </div>
             <h4 class="font-bold">{{ $vehicle->brand }} {{ $vehicle->model }}</h4>
-            <p class="text-white/55 text-sm mb-4">{{ $vehicle->year }} &bull; {{ __("frontend.{$vehicle->transmission}") }}</p>
+            <p class="text-gray-500 dark:text-white/55 text-sm mb-4">{{ $vehicle->year }} &bull; {{ __("frontend.{$vehicle->transmission}") }}</p>
 
             <div class="mb-4">
                 @if($availability['status'] === 'available')
@@ -84,9 +84,9 @@
                 @endif
             </div>
 
-            <div class="border-t border-[rgba(255,255,255,0.06)] pt-4">
+            <div class="border-t border-gray-200 dark:border-white/[0.06] pt-4">
                 <div class="flex justify-between mb-2 text-sm">
-                    <span class="text-white/55">{{ $vehicle->daily_rate }} {{ __('frontend.dh') }} &times; {{ $days }} {{ __('frontend.days') }}</span>
+                    <span class="text-gray-500 dark:text-white/55">{{ $vehicle->daily_rate }} {{ __('frontend.dh') }} &times; {{ $days }} {{ __('frontend.days') }}</span>
                     <span class="font-medium">{{ $total }} {{ __('frontend.dh') }}</span>
                 </div>
                 <div class="flex justify-between text-lg font-bold">

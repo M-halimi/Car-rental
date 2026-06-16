@@ -3,7 +3,19 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\AgencyStatsOverviewWidget;
+use App\Filament\Widgets\CommissionStatusBreakdown;
+use App\Filament\Widgets\FinanceOverviewWidget;
+use App\Filament\Widgets\GlobalMonthlyRevenueWidget;
+use App\Filament\Widgets\ModerationQueueCountWidget;
+use App\Filament\Widgets\MonthlyRevenueChart;
 use App\Filament\Widgets\MonthlyRevenueWidget;
+use App\Filament\Widgets\PendingBookingsWidget;
+use App\Filament\Widgets\PlatformBookingAnalyticsWidget;
+use App\Filament\Widgets\PlatformOccupancyWidget;
+use App\Filament\Widgets\RecentCommissionsWidget;
+use App\Filament\Widgets\ReportsTodayWidget;
+use App\Filament\Widgets\RevenuePerAgencyWidget;
+use App\Filament\Widgets\TotalBookingsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -37,9 +49,21 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                AgencyStatsOverviewWidget::class,
-                MonthlyRevenueWidget::class,
                 FilamentInfoWidget::class,
+                AgencyStatsOverviewWidget::class,
+                FinanceOverviewWidget::class,
+                TotalBookingsWidget::class,
+                GlobalMonthlyRevenueWidget::class,
+                PendingBookingsWidget::class,
+                ModerationQueueCountWidget::class,
+                ReportsTodayWidget::class,
+                MonthlyRevenueWidget::class,
+                MonthlyRevenueChart::class,
+                CommissionStatusBreakdown::class,
+                RevenuePerAgencyWidget::class,
+                RecentCommissionsWidget::class,
+                PlatformBookingAnalyticsWidget::class,
+                PlatformOccupancyWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

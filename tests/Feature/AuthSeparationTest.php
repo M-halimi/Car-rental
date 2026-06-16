@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Agency;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -129,6 +130,11 @@ class AuthSeparationTest extends TestCase
     {
         $user = User::factory()->create();
         $user->assignRole('agency');
+        Agency::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'active',
+        ]);
+        $user->refresh();
 
         $agencyPanel = app('filament')->getPanel('agency');
         $this->assertTrue($user->canAccessPanel($agencyPanel));

@@ -8,7 +8,7 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold mb-8">{{ __('frontend.upload_documents') }}</h1>
 
-    <div class="max-w-2xl mx-auto bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] rounded-xl p-8">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-xl p-4 sm:p-8">
         @if($errors->any())
             <div class="bg-red-500/10 border border-red-500/20 text-danger px-4 py-3 rounded-lg mb-6 text-sm">
                 <ul class="list-disc list-inside">
@@ -28,13 +28,13 @@
             @endforeach
 
             <div class="mb-6">
-                <label class="block text-white text-sm font-semibold mb-2">{{ __('frontend.national_id') }} <span class="text-danger">*</span></label>
-                <div class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-xl p-8 text-center hover:border-accent/50 transition cursor-pointer" id="id_document_wrapper">
+                <label class="block text-gray-700 dark:text-white text-sm font-semibold mb-2">{{ __('frontend.national_id') }} <span class="text-danger">*</span></label>
+                <div class="border-2 border-dashed border-gray-200 dark:border-white/[0.15] rounded-xl p-5 sm:p-8 text-center hover:border-accent/50 transition cursor-pointer" id="id_document_wrapper">
                     <input type="file" name="id_document" accept="image/*,.pdf" class="hidden" id="id_document" required>
                     <label for="id_document" class="cursor-pointer">
-                        <div class="text-4xl mb-2" id="id_document_icon">📄</div>
-                        <p class="text-white/55" id="id_document_label">{{ __('frontend.upload_click') }}</p>
-                        <p class="text-white/30 text-sm mt-1">{{ __('frontend.upload_format') }}</p>
+                        <div class="text-3xl sm:text-4xl mb-2" id="id_document_icon">📄</div>
+                        <p class="text-gray-500 dark:text-white/55 text-sm sm:text-base" id="id_document_label">{{ __('frontend.upload_click') }}</p>
+                        <p class="text-gray-400 dark:text-white/30 text-xs sm:text-sm mt-1">{{ __('frontend.upload_format') }}</p>
                     </label>
                 </div>
                 @error('id_document')
@@ -42,14 +42,14 @@
                 @enderror
             </div>
 
-            <div class="mb-8">
-                <label class="block text-white text-sm font-semibold mb-2">{{ __('frontend.drivers_license') }} <span class="text-danger">*</span></label>
-                <div class="border-2 border-dashed border-[rgba(255,255,255,0.15)] rounded-xl p-8 text-center hover:border-accent/50 transition cursor-pointer" id="license_document_wrapper">
+            <div class="mb-6 sm:mb-8">
+                <label class="block text-gray-700 dark:text-white text-sm font-semibold mb-2">{{ __('frontend.drivers_license') }} <span class="text-danger">*</span></label>
+                <div class="border-2 border-dashed border-gray-200 dark:border-white/[0.15] rounded-xl p-5 sm:p-8 text-center hover:border-accent/50 transition cursor-pointer" id="license_document_wrapper">
                     <input type="file" name="license_document" accept="image/*,.pdf" class="hidden" id="license_document" required>
                     <label for="license_document" class="cursor-pointer">
                         <div class="text-4xl mb-2" id="license_document_icon">🪪</div>
-                        <p class="text-white/55" id="license_document_label">{{ __('frontend.upload_click') }}</p>
-                        <p class="text-white/30 text-sm mt-1">{{ __('frontend.upload_format') }}</p>
+                        <p class="text-gray-500 dark:text-white/55" id="license_document_label">{{ __('frontend.upload_click') }}</p>
+                        <p class="text-gray-400 dark:text-white/30 text-sm mt-1">{{ __('frontend.upload_format') }}</p>
                     </label>
                 </div>
                 @error('license_document')
@@ -58,7 +58,7 @@
             </div>
 
             <div class="flex gap-4">
-                <a href="{{ route('frontend.booking.step2') }}" class="flex-1 bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.1)] text-white/70 hover:text-white py-3 rounded-lg text-center font-medium transition text-sm">
+                <a href="{{ route('frontend.booking.step2') }}" class="flex-1 bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.1] text-gray-600 dark:text-white/70 hover:text-gray-700 dark:hover:text-white py-3 rounded-lg text-center font-medium transition text-sm">
                     &larr; {{ __('frontend.back') }}
                 </a>
                 <button type="submit" class="flex-1 bg-accent hover:bg-accent-hover text-white py-3 rounded-lg font-medium transition text-sm">
@@ -82,8 +82,10 @@
                 if (icon) icon.textContent = '✅';
                 if (label) label.textContent = this.files[0].name;
                 if (wrapper) {
-                    wrapper.classList.remove('border-[rgba(255,255,255,0.15)]');
-                    wrapper.classList.add('border-accent/50', 'bg-accent/5');
+                    wrapper.className = wrapper.className
+                        .replace('border-gray-200', '')
+                        .replace(/dark:border-white\/\[0\.15\]/g, '')
+                        .trim() + ' border-accent/50 bg-accent/5';
                 }
             }
         });

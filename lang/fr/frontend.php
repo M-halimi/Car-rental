@@ -8,6 +8,7 @@ return [
     'pickup_date' => 'Date de retrait',
     'return_date' => 'Date de retour',
     'popular_cities' => 'Villes populaires',
+    'no_extras_available' => 'Aucun supplément disponible',
     'available_cars' => 'Voitures disponibles',
     'filters' => 'Filtres',
     'price_range' => 'Fourchette de prix',
@@ -30,6 +31,8 @@ return [
     'comparison_title' => 'Comparaison des véhicules',
     'select_dates' => 'Sélectionner les dates',
     'add_extras' => 'Ajouter des extras',
+    'essential_extras' => 'Extras Essentiels',
+    'additional_extras' => 'Extras Supplémentaires',
     'upload_documents' => 'Télécharger les documents',
     'review_confirm' => 'Vérifier et confirmer',
     'confirmation' => 'Confirmation',
@@ -165,6 +168,7 @@ return [
     'booking_already_cancelled' => 'Cette réservation est déjà annulée.',
     'booking_cannot_cancel' => 'Cette réservation ne peut pas être annulée.',
     'booking_already_confirmed' => 'Votre réservation a déjà été confirmée.',
+    'confirm_booking' => 'Confirmer la Réservation',
     'booking_confirmed_success' => 'Réservation :id confirmée avec succès !',
     'payment_history' => 'Historique des Paiements',
     'date' => 'Date',
@@ -194,4 +198,12 @@ return [
     'password_set_success' => 'Compte créé avec succès ! Vous êtes maintenant connecté.',
     'creating_account' => 'Création de votre compte...',
     'dates' => 'Dates',
+
+    // Track Booking
+    'track_my_booking' => 'Suivre ma réservation',
+    'track_subtitle' => 'Entrez votre email pour retrouver vos réservations',
+    'track_lookup' => 'Rechercher mes réservations',
+    'track_no_bookings' => 'Aucune réservation trouvée pour cet email',
+    'track_register_prompt' => 'Vous voulez gérer vos réservations ?',
+    'registration_linked_bookings' => 'Bon retour ! Vos réservations passées ont été liées à votre compte.',
 ];

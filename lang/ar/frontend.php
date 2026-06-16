@@ -8,6 +8,7 @@ return [
     'pickup_date' => 'تاريخ الاستلام',
     'return_date' => 'تاريخ الإرجاع',
     'popular_cities' => 'المدن الشعبية',
+    'no_extras_available' => 'لا توجد إضافات متاحة',
     'available_cars' => 'السيارات المتاحة',
     'filters' => 'الفلاتر',
     'price_range' => 'نطاق السعر',
@@ -30,6 +31,8 @@ return [
     'comparison_title' => 'مقارنة المركبات',
     'select_dates' => 'اختر التواريخ',
     'add_extras' => 'إضافة إضافات',
+    'essential_extras' => 'الإضافات الأساسية',
+    'additional_extras' => 'إضافات إضافية',
     'upload_documents' => 'تحميل الوثائق',
     'review_confirm' => 'المراجعة والتأكيد',
     'confirmation' => 'التأكيد',
@@ -165,6 +168,7 @@ return [
     'booking_already_cancelled' => 'هذا الحجز ملغي بالفعل.',
     'booking_cannot_cancel' => 'لا يمكن إلغاء هذا الحجز.',
     'booking_already_confirmed' => 'تم تأكيد حجزك بالفعل.',
+    'confirm_booking' => 'تأكيد الحجز',
     'booking_confirmed_success' => 'تم تأكيد الحجز :id بنجاح!',
     'payment_history' => 'سجل المدفوعات',
     'date' => 'التاريخ',
@@ -194,4 +198,12 @@ return [
     'password_set_success' => 'تم إنشاء الحساب بنجاح! أنت مسجل الدخول الآن.',
     'creating_account' => 'جاري إنشاء حسابك...',
     'dates' => 'التواريخ',
+
+    // Track Booking
+    'track_my_booking' => 'تتبع حجزي',
+    'track_subtitle' => 'أدخل بريدك الإلكتروني للعثور على حجوزاتك',
+    'track_lookup' => 'بحث في حجوزاتي',
+    'track_no_bookings' => 'لم يتم العثور على حجوزات لهذا البريد الإلكتروني',
+    'track_register_prompt' => 'هل تريد إدارة حجوزاتك؟',
+    'registration_linked_bookings' => 'مرحباً بعودتك! تم ربط حجوزاتك السابقة بحسابك.',
 ];

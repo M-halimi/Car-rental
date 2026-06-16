@@ -63,6 +63,11 @@ class Customer extends Model
         return $this->hasMany(VehicleReview::class);
     }
 
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
     public function payments(): HasManyThrough
     {
         return $this->hasManyThrough(

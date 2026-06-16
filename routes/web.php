@@ -6,17 +6,21 @@ use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Frontend\DashboardController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\LanguageController;
+use App\Http\Controllers\Frontend\TrackBookingController;
 use App\Livewire\Customer\BookingConfirmation;
 use App\Livewire\Customer\BookingSuccess;
 use App\Livewire\Customer\PaymentHistoryPage;
+use App\Livewire\Frontend\FavoritesPage;
+use App\Livewire\Frontend\VehicleDetail;
+use App\Livewire\Frontend\VehicleListing;
 use App\Models\Booking;
 use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('frontend.home');
-Route::get('/vehicles', [HomeController::class, 'vehicles'])->name('frontend.vehicles');
-Route::get('/vehicle/{id}', [HomeController::class, 'vehicleDetail'])->name('frontend.vehicle.detail');
+Route::get('/vehicles', VehicleListing::class)->name('frontend.vehicles');
+Route::get('/vehicle/{vehicle}', VehicleDetail::class)->name('frontend.vehicle.detail');
 Route::get('/compare', [HomeController::class, 'compare'])->name('frontend.compare');
 Route::get('/check-availability/{vehicle}', [HomeController::class, 'checkAvailability'])->name('frontend.availability.check');
 
@@ -26,11 +30,15 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logou
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('frontend.register');
 Route::post('/register', [RegisterController::class, 'register']);
 
+Route::get('/track', [TrackBookingController::class, 'showForm'])->name('frontend.track');
+Route::post('/track', [TrackBookingController::class, 'track'])->name('frontend.track.lookup');
+
 Route::get('/booking/step1', [BookingController::class, 'step1'])->name('frontend.booking.step1');
 Route::match(['get', 'post'], '/booking/step2', [BookingController::class, 'step2'])->name('frontend.booking.step2');
 Route::match(['get', 'post'], '/booking/step3', [BookingController::class, 'step3'])->name('frontend.booking.step3');
 Route::match(['get', 'post'], '/booking/step4', [BookingController::class, 'step4'])->name('frontend.booking.step4');
 Route::get('/booking/confirm', BookingConfirmation::class)->name('frontend.booking.confirm');
+Route::post('/booking/confirm', [BookingController::class, 'confirm']);
 
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/booking/success/{booking}', BookingSuccess::class)->name('frontend.booking.success');
@@ -39,6 +47,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('frontend.booking.cancel');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('frontend.dashboard');
+    Route::get('/favorites', FavoritesPage::class)->name('frontend.favorites');
     Route::get('/account/payments', PaymentHistoryPage::class)->name('frontend.payments');
     Route::get('/payment/{payment}/receipt', function (Payment $payment) {
         $customer = auth()->user()?->customer;

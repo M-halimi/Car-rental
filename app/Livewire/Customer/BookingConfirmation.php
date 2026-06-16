@@ -4,7 +4,9 @@ namespace App\Livewire\Customer;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\BookingExtra;
 use App\Models\Customer;
+use App\Models\Extra;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\AvailabilityService;
@@ -149,13 +151,17 @@ class BookingConfirmation extends Component
                 Auth::login($user);
             }
         } else {
-            $customer = auth()->user()?->customer;
+            $user = auth()->user();
+            $customer = $user?->customer;
 
             if (! $customer) {
-                $this->addError('customer', 'Customer profile not found.');
-                $this->submitting = false;
-
-                return;
+                $nameParts = explode(' ', $user->name, 2);
+                $customer = Customer::create([
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0] ?? $user->name,
+                    'last_name' => $nameParts[1] ?? '',
+                    'phone' => '',
+                ]);
             }
         }
 
@@ -186,6 +192,7 @@ class BookingConfirmation extends Component
                 $booking = Booking::create([
                     'vehicle_id' => $this->bookingData['vehicle_id'],
                     'customer_id' => $customer->id,
+                    'customer_email' => auth()->check() ? auth()->user()->email : $this->guestEmail,
                     'pickup_city_id' => $this->bookingData['pickup_city_id'],
                     'return_city_id' => $this->bookingData['return_city_id'] ?? $this->bookingData['pickup_city_id'],
                     'pickup_date' => $this->bookingData['pickup_date'],
@@ -201,6 +208,46 @@ class BookingConfirmation extends Component
                     'status' => BookingStatus::Pending->value,
                     'notes' => $this->notes,
                 ]);
+
+                $days = $this->bookingData['total_days'] ?? 1;
+
+                $legacyExtras = [
+                    'gps' => ['name' => 'GPS Navigation', 'name_ar' => 'ملاحة GPS', 'name_fr' => 'Navigation GPS', 'price' => 50],
+                    'child_seat' => ['name' => 'Child Seat', 'name_ar' => 'مقعد أطفال', 'name_fr' => 'Siège enfant', 'price' => 30],
+                    'additional_driver' => ['name' => 'Additional Driver', 'name_ar' => 'سائق إضافي', 'name_fr' => 'Conducteur supplémentaire', 'price' => 100],
+                ];
+
+                foreach ($legacyExtras as $key => $extraData) {
+                    if (! empty($this->bookingData[$key])) {
+                        BookingExtra::create([
+                            'booking_id' => $booking->id,
+                            'extra_id' => null,
+                            'name' => $extraData['name'],
+                            'name_ar' => $extraData['name_ar'],
+                            'name_fr' => $extraData['name_fr'],
+                            'price_per_day' => $extraData['price'],
+                            'quantity' => 1,
+                            'total_price' => $extraData['price'] * max(1, $days),
+                        ]);
+                    }
+                }
+
+                $selectedExtras = $this->bookingData['selected_extras'] ?? [];
+                if (! empty($selectedExtras)) {
+                    $extraModels = Extra::whereIn('id', $selectedExtras)->where('is_active', true)->get();
+                    foreach ($extraModels as $extra) {
+                        BookingExtra::create([
+                            'booking_id' => $booking->id,
+                            'extra_id' => $extra->id,
+                            'name' => $extra->name,
+                            'name_ar' => $extra->name_ar,
+                            'name_fr' => $extra->name_fr,
+                            'price_per_day' => $extra->price_per_day,
+                            'quantity' => 1,
+                            'total_price' => $extra->price_per_day * max(1, $days),
+                        ]);
+                    }
+                }
 
                 DB::table('booking_idempotency_keys')->insert([
                     'key' => $token,

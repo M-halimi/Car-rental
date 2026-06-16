@@ -1,10 +1,7 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
 import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-
-window.Alpine = Alpine;
 
 document.addEventListener('livewire:init', () => {
     Livewire.on('calendarDataUpdated', (data) => {
@@ -48,5 +45,3 @@ function initFullCalendar(data) {
     calendar.render();
     window.calendar = calendar;
 }
-
-Alpine.start();

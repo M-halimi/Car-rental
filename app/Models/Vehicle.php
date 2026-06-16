@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vehicle extends Model
@@ -103,6 +104,43 @@ class Vehicle extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(VehicleReview::class);
+    }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function getAvgRatingAttribute(): ?float
+    {
+        return $this->reviews()->where('is_approved', true)->avg('rating');
+    }
+
+    public function getReviewsCountAttribute(): int
+    {
+        return $this->reviews()->where('is_approved', true)->count();
+    }
+
+    public function getIsFavoritedAttribute(): bool
+    {
+        if (! auth()->check()) {
+            return false;
+        }
+
+        $customer = auth()->user()->customer;
+
+        if (! $customer) {
+            return false;
+        }
+
+        return $this->favorites()
+            ->where('customer_id', $customer->id)
+            ->exists();
     }
 
     public function scopeAvailable(Builder $query): Builder
